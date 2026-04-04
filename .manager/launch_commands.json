@@ -1,0 +1,15 @@
+[{
+  "module": "firstrate_learning.v5_wrank.train",
+  "script_file": "firstrate_learning/v5_wrank/train.py",
+  "flags": ["--resume", "run_20260404_181001_proveout", "--w-rank", "0.3", "--rank-loss-type", "listmle", "--total-steps", "50000"],
+  "log": "firstrate_learning/v5_wrank/prove.log",
+  "launched": true,
+  "expect": {
+    "log_file": "firstrate_learning/v5_wrank/prove.log",
+    "checkpoint_dir": "firstrate_learning/v5_wrank/models/run_20260404_181001_proveout",
+    "checkpoint_file": "latest_checkpoint.pt",
+    "cache_files": [],
+    "min_gpu_pct": 50,
+    "max_idle_minutes": 10
+  }
+}]
