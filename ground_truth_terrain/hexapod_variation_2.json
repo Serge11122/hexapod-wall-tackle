@@ -30,12 +30,12 @@
       "side": "rear-left"
     }
   ],
-  "description": "Variation 2 \u2014 Step crossing. Front feet on upper, rear on lower, body tilts then levels. 4 steps.",
+  "description": "Variation 2 \u2014 Step crossing. Alternating legs straddle the step. 4 steps.",
   "num_steps": 4,
   "steps": [
     {
       "step_index": 0,
-      "description": "Front feet land on upper platform, body tilts forward",
+      "description": "Front feet on upper platform; rear still on lower. Body tilts.",
       "body": {
         "x": 1.9,
         "y": 1.5,
@@ -44,53 +44,53 @@
       "legs": [
         {
           "id": 0,
-          "theta1": -0.5336,
-          "theta2": -2.0499,
+          "theta1": -0.3947,
+          "theta2": -2.0069,
           "foot_world": {
-            "x": 3.0,
+            "x": 3.2,
             "y": 0.6
           }
         },
         {
           "id": 1,
-          "theta1": -0.5336,
-          "theta2": -2.0499,
+          "theta1": -3.1369,
+          "theta2": 2.0445,
           "foot_world": {
-            "x": 3.0,
+            "x": 2.7,
             "y": 0.6
           }
         },
         {
           "id": 2,
-          "theta1": -2.8355,
-          "theta2": 1.3708,
+          "theta1": -2.8929,
+          "theta2": 1.2795,
           "foot_world": {
-            "x": 0.5,
+            "x": 0.3,
             "y": -0.4
           }
         },
         {
           "id": 3,
-          "theta1": -2.8355,
-          "theta2": 1.3708,
+          "theta1": -2.7007,
+          "theta2": 1.442,
           "foot_world": {
-            "x": 0.5,
+            "x": 0.8,
             "y": -0.4
           }
         }
       ],
       "free_legs": [
         0,
-        1
+        2
       ],
       "planted_legs": [
-        2,
+        1,
         3
       ]
     },
     {
       "step_index": 1,
-      "description": "Body advances, rear feet swing to step base",
+      "description": "Body advances; rear feet swing toward step base",
       "body": {
         "x": 2.2,
         "y": 1.5,
@@ -99,48 +99,48 @@
       "legs": [
         {
           "id": 0,
-          "theta1": -0.3693,
-          "theta2": -2.1563,
+          "theta1": -0.4599,
+          "theta2": -2.1624,
           "foot_world": {
-            "x": 3.3,
+            "x": 3.2,
             "y": 0.6
           }
         },
         {
           "id": 1,
-          "theta1": -0.3693,
-          "theta2": -2.1563,
+          "theta1": -0.2153,
+          "theta2": -2.1146,
           "foot_world": {
-            "x": 3.3,
+            "x": 3.5,
             "y": 0.6
           }
         },
         {
           "id": 2,
-          "theta1": -2.5961,
-          "theta2": 1.2655,
+          "theta1": -2.6629,
+          "theta2": 1.1928,
           "foot_world": {
-            "x": 0.9,
+            "x": 0.7,
             "y": -0.4
           }
         },
         {
           "id": 3,
-          "theta1": -2.5961,
-          "theta2": 1.2655,
+          "theta1": -2.4505,
+          "theta2": 1.3075,
           "foot_world": {
-            "x": 0.9,
+            "x": 1.2,
             "y": -0.4
           }
         }
       ],
       "free_legs": [
-        2,
+        1,
         3
       ],
       "planted_legs": [
         0,
-        1
+        2
       ]
     },
     {
@@ -154,53 +154,53 @@
       "legs": [
         {
           "id": 0,
-          "theta1": -0.2946,
-          "theta2": -2.2661,
+          "theta1": -0.1032,
+          "theta2": -2.2443,
           "foot_world": {
-            "x": 3.8,
+            "x": 4.0,
             "y": 0.6
           }
         },
         {
           "id": 1,
-          "theta1": -0.2946,
-          "theta2": -2.2661,
+          "theta1": -3.2156,
+          "theta2": 2.2186,
           "foot_world": {
-            "x": 3.8,
+            "x": 3.5,
             "y": 0.6
           }
         },
         {
           "id": 2,
-          "theta1": -2.4255,
-          "theta2": 1.0741,
+          "theta1": -2.4715,
+          "theta2": 0.9764,
           "foot_world": {
-            "x": 1.4,
+            "x": 1.2,
             "y": -0.4
           }
         },
         {
           "id": 3,
-          "theta1": -2.4255,
-          "theta2": 1.0741,
+          "theta1": -2.3919,
+          "theta2": 1.1071,
           "foot_world": {
-            "x": 1.4,
+            "x": 1.5,
             "y": -0.4
           }
         }
       ],
       "free_legs": [
         0,
-        1
+        2
       ],
       "planted_legs": [
-        2,
+        1,
         3
       ]
     },
     {
       "step_index": 3,
-      "description": "Rear feet plant on upper platform, all four on upper level.",
+      "description": "Rear feet both on upper platform. All four on upper level.",
       "body": {
         "x": 3.3,
         "y": 1.7,
@@ -209,48 +209,48 @@
       "legs": [
         {
           "id": 0,
-          "theta1": -0.2702,
-          "theta2": -2.104,
+          "theta1": -0.1908,
+          "theta2": -2.0896,
           "foot_world": {
-            "x": 4.4,
+            "x": 4.5,
             "y": 0.6
           }
         },
         {
           "id": 1,
-          "theta1": -0.2702,
-          "theta2": -2.104,
+          "theta1": -3.0211,
+          "theta2": 2.0658,
           "foot_world": {
-            "x": 4.4,
+            "x": 4.0,
             "y": 0.6
           }
         },
         {
           "id": 2,
-          "theta1": -0.3576,
-          "theta2": -2.1089,
+          "theta1": -0.1908,
+          "theta2": -2.0896,
           "foot_world": {
-            "x": 2.3,
+            "x": 2.5,
             "y": 0.6
           }
         },
         {
           "id": 3,
-          "theta1": -0.3576,
-          "theta2": -2.1089,
+          "theta1": -3.0211,
+          "theta2": 2.0658,
           "foot_world": {
-            "x": 2.3,
+            "x": 2.0,
             "y": 0.6
           }
         }
       ],
       "free_legs": [
-        2,
+        1,
         3
       ],
       "planted_legs": [
         0,
-        1
+        2
       ]
     }
   ]
