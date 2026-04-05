@@ -5,6 +5,7 @@ import torch.func
 import torch.linalg
 
 import numpy as np
+from pathlib import Path
 from dataclasses import dataclass
 
 from importlib import reload
@@ -244,7 +245,7 @@ def optimize_pose(loss_fn, init_tensor, lb, ub):
 
 
 def main():
-    mpl.use('TkAgg')
+    mpl.use('Agg')
     _, ax = plt.subplots(2, 2)
     ax = list(ax.flatten())
     print(f'{ax=}')
@@ -294,7 +295,6 @@ def main():
     body = BodyTensor(res_x[:BodyTensor.N_ENTRIES])
     body.draw(ax[2], free_leg_set=loss_along_surface.free_leg_set)
     gym.draw(ax[2])
-    return
 
     loss_along_surface.update_targets_and_change_free_leg_set(body)
 
@@ -305,6 +305,12 @@ def main():
     body.draw(ax[3], free_leg_set=loss_along_surface.free_leg_set)
     loss_along_surface.update_targets_and_change_free_leg_set(body)
     gym.draw(ax[3])
+
+    output_dir = Path(__file__).parent / 'output'
+    output_dir.mkdir(exist_ok=True)
+    plt.tight_layout()
+    plt.savefig(output_dir / 'hexapod_wall_tackle.png', dpi=150)
+    print(f'Saved to {output_dir / "hexapod_wall_tackle.png"}')
 
 
 if __name__ == '__main__':
