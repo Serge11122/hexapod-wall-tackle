@@ -1,19 +1,20 @@
-# RLQuest Project Goals
+# Hexapod Wall Tackle Project Goals
 
 ## Core Thesis
 
-A perfect foresight model proves profitable trades exist in every market regime (170% return in 50 days, 9.16 Sharpe). Modern transformer architectures trained on large raw data can learn subtle patterns — slight volume changes, implied volatility shifts, put-call ratio anomalies — that predict large moves. The goal is to close the gap between current model performance and the foresight upper bound.
+A 2D quadruped robot can learn to climb over obstacles of varying heights through optimized joint angle sequences. By combining forward kinematics, constraint-based optimization, and differentiable rendering, we can synthesize locomotion gaits that successfully navigate parametric wall heights.
 
 ## Architecture
 
-- **Backbone (FirstRate Learning)** — per-stock feature extractor. Transformer architecture that processes raw options chain + price data as token sequences. No hand-crafted features — lets the model learn directly from moneyness, DTE, bid/ask, volume, open interest. Predicts: big move probability, direction, return quantiles, return magnitude.
+- **Robot Model** — 2D quadruped with 4 legs (body + 2 joints per leg). Each leg has fixed segment lengths (L1, L2). Pose is described by 11 parameters: 3 for body (x, y, angle) + 8 for leg joint angles.
 
-- **Portfolio Model (downstream)** — uses the backbone as a frozen feature extractor to learn trading signals across all stocks. Designs buy/sell signals for variable-size universes (e.g., train on 2K stocks, inference on 5K). Handles cross-sectional ranking that the backbone cannot.
+- **Ground & Obstacle** — Flat ground with a vertical wall of parametric height. Robot must transition from ground level to obstacle height while maintaining stability and leg constraints.
+
+- **Solver** — Constraint-based optimization to find joint angle sequences that: (1) lift legs over the obstacle, (2) maintain valid leg positions within reachable workspace, (3) enforce gait phases (support/swing legs). Supports multiple optimization backends.
 
 ## Goals
 
-- Build backbone transformer that extracts strong per-stock signals from raw options data
-- Build portfolio model that translates backbone signals into profitable cross-sectional portfolios
-- Iterate on training recipe: loss weights, learning rate schedule, data augmentation
-- Evaluate on standard metrics (P@5%, captured return, rank correlation, direction accuracy)
-- Progress toward foresight benchmark quality of stock selection
+- Synthesize valid locomotion gaits for obstacles of various heights
+- Produce smooth animations of robot climbing via optimized joint sequences
+- Maintain forward kinematics validity and leg workspace constraints throughout motion
+- Extend to multi-phase gaits (e.g., diagonal or trotting patterns)
