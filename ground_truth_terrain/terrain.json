@@ -1,0 +1,58 @@
+{
+  "description": "Step terrain — a flat lower platform, a vertical riser, and a flat upper platform. Matches the sigmoid approximation used in 2d_wall_tackle.py (center x=2.2, sigmoid k=20). The step is discretised here as three straight-line segments for simulation / ground-truth purposes.",
+  "coordinate_system": "2D world frame, x = horizontal (right), y = vertical (up). Robot travels left-to-right.",
+  "units": "dimensionless (same scale as robot: body half-length = 1.0, leg segments L1=1.0 L2=1.2)",
+
+  "step": {
+    "lower_platform_y": -0.4,
+    "upper_platform_y":  0.6,
+    "step_height":        1.0,
+    "step_x":             2.2,
+    "total_length":      10.0,
+    "x_start":           -4.0,
+    "x_end":              6.0
+  },
+
+  "segments": [
+    {
+      "id": "lower_platform",
+      "description": "Flat ground before the step",
+      "start": { "x": -4.0, "y": -0.4 },
+      "end":   { "x":  2.2, "y": -0.4 },
+      "length": 6.2,
+      "height": 0.0
+    },
+    {
+      "id": "riser",
+      "description": "Vertical face of the step",
+      "start": { "x": 2.2, "y": -0.4 },
+      "end":   { "x": 2.2, "y":  0.6 },
+      "length": 0.0,
+      "height": 1.0
+    },
+    {
+      "id": "upper_platform",
+      "description": "Flat ground on top of the step",
+      "start": { "x": 2.2, "y": 0.6 },
+      "end":   { "x": 6.0, "y": 0.6 },
+      "length": 3.8,
+      "height": 0.0
+    }
+  ],
+
+  "surface_points": [
+    { "x": -4.0, "y": -0.4 },
+    { "x": -3.0, "y": -0.4 },
+    { "x": -2.0, "y": -0.4 },
+    { "x": -1.0, "y": -0.4 },
+    { "x":  0.0, "y": -0.4 },
+    { "x":  1.0, "y": -0.4 },
+    { "x":  2.0, "y": -0.4 },
+    { "x":  2.2, "y": -0.4 },
+    { "x":  2.2, "y":  0.6 },
+    { "x":  3.0, "y":  0.6 },
+    { "x":  4.0, "y":  0.6 },
+    { "x":  5.0, "y":  0.6 },
+    { "x":  6.0, "y":  0.6 }
+  ]
+}

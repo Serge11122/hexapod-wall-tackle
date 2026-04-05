@@ -1,0 +1,256 @@
+{
+  "body_half_length": 1.0,
+  "body_half_height": 0.2,
+  "leg_L1": 1.0,
+  "leg_L2": 1.2,
+  "terrain_file": "terrain.json",
+  "leg_mounts_body_frame": [
+    {
+      "id": 0,
+      "x": 1.0,
+      "y": 0.0,
+      "side": "front-right"
+    },
+    {
+      "id": 1,
+      "x": 1.0,
+      "y": 0.0,
+      "side": "front-left"
+    },
+    {
+      "id": 2,
+      "x": -1.0,
+      "y": 0.0,
+      "side": "rear-right"
+    },
+    {
+      "id": 3,
+      "x": -1.0,
+      "y": 0.0,
+      "side": "rear-left"
+    }
+  ],
+  "description": "Variation 1 \u2014 Approach phase. Hexapod on lower platform walking toward step. 4 steps.",
+  "num_steps": 4,
+  "steps": [
+    {
+      "step_index": 0,
+      "description": "Start: symmetric stance, all feet planted",
+      "body": {
+        "x": 0.0,
+        "y": 1.5,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.8926,
+          "theta2": -1.0424,
+          "foot_world": {
+            "x": 1.2,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.8926,
+          "theta2": -1.0424,
+          "foot_world": {
+            "x": 1.2,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.249,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": -1.2,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.249,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": -1.2,
+            "y": -0.4
+          }
+        }
+      ],
+      "free_legs": [],
+      "planted_legs": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "step_index": 1,
+      "description": "Front feet swing forward",
+      "body": {
+        "x": 0.0,
+        "y": 1.5,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.7755,
+          "theta2": -0.807,
+          "foot_world": {
+            "x": 1.7,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.7755,
+          "theta2": -0.807,
+          "foot_world": {
+            "x": 1.7,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.249,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": -1.2,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.249,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": -1.2,
+            "y": -0.4
+          }
+        }
+      ],
+      "free_legs": [
+        0,
+        1
+      ],
+      "planted_legs": [
+        2,
+        3
+      ]
+    },
+    {
+      "step_index": 2,
+      "description": "Body advances, rear feet swing forward",
+      "body": {
+        "x": 0.8,
+        "y": 1.5,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -2.0393,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": 2.0,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -2.0393,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": 2.0,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.2871,
+          "theta2": 1.0181,
+          "foot_world": {
+            "x": -0.5,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.2871,
+          "theta2": 1.0181,
+          "foot_world": {
+            "x": -0.5,
+            "y": -0.4
+          }
+        }
+      ],
+      "free_legs": [
+        2,
+        3
+      ],
+      "planted_legs": [
+        0,
+        1
+      ]
+    },
+    {
+      "step_index": 3,
+      "description": "Pre-step: front feet at x=2.0, ready to tackle step",
+      "body": {
+        "x": 1.0,
+        "y": 1.5,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -2.1549,
+          "theta2": 1.0616,
+          "foot_world": {
+            "x": 2.0,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -2.1549,
+          "theta2": 1.0616,
+          "foot_world": {
+            "x": 2.0,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -0.9867,
+          "theta2": -1.0616,
+          "foot_world": {
+            "x": 0.0,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.9867,
+          "theta2": -1.0616,
+          "foot_world": {
+            "x": 0.0,
+            "y": -0.4
+          }
+        }
+      ],
+      "free_legs": [
+        0,
+        1
+      ],
+      "planted_legs": [
+        2,
+        3
+      ]
+    }
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "body_half_length": 1.0,
+  "body_half_height": 0.2,
+  "leg_L1": 1.0,
+  "leg_L2": 1.2,
+  "terrain_file": "terrain.json",
+  "leg_mounts_body_frame": [
+    {
+      "id": 0,
+      "x": 1.0,
+      "y": 0.0,
+      "side": "front-right"
+    },
+    {
+      "id": 1,
+      "x": 1.0,
+      "y": 0.0,
+      "side": "front-left"
+    },
+    {
+      "id": 2,
+      "x": -1.0,
+      "y": 0.0,
+      "side": "rear-right"
+    },
+    {
+      "id": 3,
+      "x": -1.0,
+      "y": 0.0,
+      "side": "rear-left"
+    }
+  ],
+  "description": "Variation 3 \u2014 Full traverse: approach, front up, rear at base, rear up, departure. 5 steps.",
+  "num_steps": 5,
+  "steps": [
+    {
+      "step_index": 0,
+      "description": "Approach: all feet on lower platform",
+      "body": {
+        "x": 0.5,
+        "y": 1.5,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.8926,
+          "theta2": -1.0424,
+          "foot_world": {
+            "x": 1.7,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.8926,
+          "theta2": -1.0424,
+          "foot_world": {
+            "x": 1.7,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.249,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": -0.7,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.249,
+          "theta2": 1.0424,
+          "foot_world": {
+            "x": -0.7,
+            "y": -0.4
+          }
+        }
+      ],
+      "free_legs": [],
+      "planted_legs": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "step_index": 1,
+      "description": "Front feet land on upper platform, body tilts up",
+      "body": {
+        "x": 1.9,
+        "y": 1.5,
+        "theta": 0.25
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.5336,
+          "theta2": -2.0499,
+          "foot_world": {
+            "x": 3.0,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.5336,
+          "theta2": -2.0499,
+          "foot_world": {
+            "x": 3.0,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.8355,
+          "theta2": 1.3708,
+          "foot_world": {
+            "x": 0.5,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.8355,
+          "theta2": 1.3708,
+          "foot_world": {
+            "x": 0.5,
+            "y": -0.4
+          }
+        }
+      ],
+      "free_legs": [
+        0,
+        1
+      ],
+      "planted_legs": [
+        2,
+        3
+      ]
+    },
+    {
+      "step_index": 2,
+      "description": "Body over step, rear feet swing to step base",
+      "body": {
+        "x": 2.5,
+        "y": 1.5,
+        "theta": 0.1
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.197,
+          "theta2": -2.1928,
+          "foot_world": {
+            "x": 3.7,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.197,
+          "theta2": -2.1928,
+          "foot_world": {
+            "x": 3.7,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.53,
+          "theta2": 1.1572,
+          "foot_world": {
+            "x": 1.1,
+            "y": -0.4
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.53,
+          "theta2": 1.1572,
+          "foot_world": {
+            "x": 1.1,
+            "y": -0.4
+          }
+        }
+      ],
+      "free_legs": [
+        2,
+        3
+      ],
+      "planted_legs": [
+        0,
+        1
+      ]
+    },
+    {
+      "step_index": 3,
+      "description": "Rear feet plant on upper platform, body levels out",
+      "body": {
+        "x": 3.3,
+        "y": 1.7,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.1908,
+          "theta2": -2.0896,
+          "foot_world": {
+            "x": 4.5,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.1908,
+          "theta2": -2.0896,
+          "foot_world": {
+            "x": 4.5,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.9508,
+          "theta2": 2.0896,
+          "foot_world": {
+            "x": 2.1,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.9508,
+          "theta2": 2.0896,
+          "foot_world": {
+            "x": 2.1,
+            "y": 0.6
+          }
+        }
+      ],
+      "free_legs": [
+        2,
+        3
+      ],
+      "planted_legs": [
+        0,
+        1
+      ]
+    },
+    {
+      "step_index": 4,
+      "description": "Departure: all four feet on upper platform",
+      "body": {
+        "x": 4.2,
+        "y": 1.7,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.1908,
+          "theta2": -2.0896,
+          "foot_world": {
+            "x": 5.4,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.1908,
+          "theta2": -2.0896,
+          "foot_world": {
+            "x": 5.4,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -2.9508,
+          "theta2": 2.0896,
+          "foot_world": {
+            "x": 3.0,
+            "y": 0.6
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -2.9508,
+          "theta2": 2.0896,
+          "foot_world": {
+            "x": 3.0,
+            "y": 0.6
+          }
+        }
+      ],
+      "free_legs": [],
+      "planted_legs": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  ]
+}
