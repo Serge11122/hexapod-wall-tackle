@@ -1,7 +1,7 @@
 #!/bin/bash
 # Launch a Claude tmux session for a specific timer slot.
 #
-# Usage: ./tmux_run_claude.sh <alias> [--model <model>] [--effort <low|medium|high>] [--thinking-off] [--thinking-on]
+# Usage: ./tmux_run_claude.sh <alias> [--model <model>] [--effort <low|medium|high>] [--view] [--thinking-off] [--thinking-on]
 #   alias: string like t_1_dev, t_1_eta, t_1_superv
 #
 # Defaults: --model sonnet (Sonnet 4.6), --effort medium, thinking disabled.
@@ -27,6 +27,7 @@ SESSION_NAME="$ALIAS"
 # Defaults: model sonnet (Sonnet 4.6), effort medium, thinking disabled
 MODEL_FLAG="--model sonnet"
 EFFORT_FLAG="--effort medium"
+VIEW=0
 # THINKING_ENV="export CLAUDE_CODE_DISABLE_THINKING=1"
 #   export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50; \
 #   $THINKING_ENV; \
@@ -35,6 +36,7 @@ while [ -n "$1" ]; do
     case "$1" in
         --model) MODEL_FLAG="--model $2"; shift 2 ;;
         --effort) EFFORT_FLAG="--effort $2"; shift 2 ;;
+        --view) VIEW=1; shift ;;
         # --thinking-off) THINKING_ENV="export CLAUDE_CODE_DISABLE_THINKING=1"; shift ;;
         # --thinking-on)  THINKING_ENV="unset CLAUDE_CODE_DISABLE_THINKING"; shift ;;
         *) shift ;;
@@ -67,3 +69,7 @@ tmux set-option -t "$SESSION_NAME" mouse on 2>/dev/null || true
 tmux set-option -t "$SESSION_NAME" history-limit 50000 2>/dev/null || true
 
 echo "Session started: $SESSION_NAME"
+
+if [ "$VIEW" -eq 1 ]; then
+    tmux attach-session -t "$SESSION_NAME"
+fi
