@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-04  
 **Analysis Status:** COMPLETE — 3 new documents created, SKILL.md modifications identified  
-**Scope of Work:** Clear boundary between supervisor (timer/orchestration) and tdev (project code)
+**Scope of Work:** Clear boundary between supervisor (timer/orchestration) and tdev_inline (project code)
 
 ---
 
@@ -23,7 +23,7 @@ This analysis identifies a critical architectural issue in the supervisor's role
 **Purpose:** Complete analysis and solution design  
 **Contents:**
 - Executive summary of the problem
-- Part 1: Clear scope boundary (what supervisor owns vs tdev owns)
+- Part 1: Clear scope boundary (what supervisor owns vs tdev_inline owns)
 - Part 2: Updated Step 4 logic (classify timer vs code issues)
 - Part 3: Escalation pattern (how supervisor detects and escalates code issues)
 - Part 4: Example incidents (today's gate_unit violation + potential future deadlocks)
@@ -84,7 +84,7 @@ This analysis identifies a critical architectural issue in the supervisor's role
 ### superv_cycle_design.md
 **Status:** Already exists (core reference)  
 **Relevance:** Architecture reference for timer cycle pipeline  
-**Use:** Background reading, understand how timer/tdeep/tdev interact
+**Use:** Background reading, understand how timer/tdeep/tdev_inline interact
 
 ### SKILL.md
 **Status:** Needs modifications (not yet updated)  
@@ -98,7 +98,7 @@ This analysis identifies a critical architectural issue in the supervisor's role
 Today's incident (2026-04-04):
 - tdeep found code violation: gate_unit.json not written by train.py
 - supervisor detected this but **tried to work around it** (wrote bypass diagnostic, restarted cycle)
-- correct approach: supervisor should **detect the violation, escalate to tdev, and exit**
+- correct approach: supervisor should **detect the violation, escalate to tdev_inline, and exit**
 - root cause: supervisor's role was ambiguous — did it own code-fixing authority? No.
 
 Result: Code never actually fixed, cycle repeated, confusion about responsibility boundaries.
@@ -112,7 +112,7 @@ Result: Code never actually fixed, cycle repeated, confusion about responsibilit
 | Responsibility | Domain | Authority | When to Act |
 |---|---|---|---|
 | **Supervisor** | Timer/Orchestration | Session health, state management, file cleanup, deadlock resolution | Detects stuck states, classifies as TIMER → fixes directly |
-| **tdev** | Project Code | Code logic, .py file changes, gate markers, config, commits | Detects stuck states classified as CODE → implements fixes |
+| **tdev_inline** | Project Code | Code logic, .py file changes, gate markers, config, commits | Detects stuck states classified as CODE → implements fixes |
 
 **Key insight:** Supervisor does NOT judge whether code is "correct." Supervisor only detects that code changes are needed and escalates.
 
@@ -162,9 +162,9 @@ When you detect a stuck state:
 1. Classify: Is this TIMER or CODE?
 2. If TIMER → Fix it directly (restart, cleanup, deadlock resolution)
 3. If CODE → Escalate: write diagnostic, set next_step=2, exit
-4. Let tdev handle code fixes via normal cycle (tconv → tdev → tdeep → launch)
+4. Let tdev_inline handle code fixes via normal cycle (tconv → tdev_inline → tdeep → launch)
 
-### For tdev (When Supervisor Escalates)
+### For tdev_inline (When Supervisor Escalates)
 **You receive escalations with full context.**
 
 When supervisor escalates:
@@ -182,7 +182,7 @@ When supervisor escalates:
 Supervisor escalation does not affect tconv's work. tconv continues to:
 - Analyze convictions
 - Find violations
-- Assign tasks to tdev
+- Assign tasks to tdev_inline
 - Propagate violations into rules
 
 ---
@@ -205,7 +205,7 @@ Can I fix this WITHOUT modifying .py files?
     └─ NO → Code issue
         ├─ tdeep violations? Requires .py changes
         ├─ Missing gate markers? Requires train.py
-        ├─ Uncomm itted changes? Requires tdev commit
+        ├─ Uncomm itted changes? Requires tdev_inline commit
         ├─ Config wrong? Requires understanding project
         └─ Go to Step 5e in SKILL.md (escalate)
 ```
@@ -263,7 +263,7 @@ All analysis documents:
 | "What should supervisor do?" | Detect, classify (timer vs code), fix timer issues, escalate code issues | SCOPE_QUICK_REFERENCE.md |
 | "Which SKILL.md sections change?" | Step 4 (add 3m), Step 5 (revise + add 5e), Step 8 (update report template) | SKILL_MODIFICATIONS_REQUIRED.md |
 | "What exactly should I change?" | See "REQUIRED CHANGE" in each section of SKILL_MODIFICATIONS_REQUIRED.md | SKILL_MODIFICATIONS_REQUIRED.md |
-| "How do I escalate to tdev?" | Write diagnostic, set next_step=2, exit. tdev reads diagnostic + deep_analysis next cycle. | SCOPE_QUICK_REFERENCE.md + SUPERVISOR_SCOPE_FIX.md 5e |
+| "How do I escalate to tdev_inline?" | Write diagnostic, set next_step=2, exit. tdev_inline reads diagnostic + deep_analysis next cycle. | SCOPE_QUICK_REFERENCE.md + SUPERVISOR_SCOPE_FIX.md 5e |
 | "What if I'm not sure?" | Default to escalate. Supervisor has no authority over code logic. | SCOPE_QUICK_REFERENCE.md |
 | "How do I test this?" | 4 test scenarios in SKILL_MODIFICATIONS_REQUIRED.md | SKILL_MODIFICATIONS_REQUIRED.md |
 

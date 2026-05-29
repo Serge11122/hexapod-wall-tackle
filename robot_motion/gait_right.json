@@ -1,0 +1,439 @@
+{
+  "description": "Loopable alternating-tripod walk right, 8 frames @ 5 fps",
+  "direction": "right",
+  "fps": 5,
+  "frames": [
+    {
+      "body": {
+        "x": 0.0,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.8965,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": 0.7,
+            "y": 0.3536
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.9867,
+          "theta2": -1.0616,
+          "foot_world": {
+            "x": 1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -0.9867,
+          "theta2": -1.0616,
+          "foot_world": {
+            "x": -1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.8965,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": -1.3,
+            "y": 0.3536
+          }
+        }
+      ],
+      "planted_legs": [
+        1,
+        2
+      ],
+      "free_legs": [
+        0,
+        3
+      ],
+      "frame_index": 0
+    },
+    {
+      "body": {
+        "x": 0.125,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.5738,
+          "theta2": -1.7722,
+          "foot_world": {
+            "x": 1.125,
+            "y": 0.5
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -1.0566,
+          "theta2": -1.0541,
+          "foot_world": {
+            "x": 1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -1.0566,
+          "theta2": -1.0541,
+          "foot_world": {
+            "x": -1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.5738,
+          "theta2": -1.7722,
+          "foot_world": {
+            "x": -0.875,
+            "y": 0.5
+          }
+        }
+      ],
+      "planted_legs": [
+        1,
+        2
+      ],
+      "free_legs": [
+        0,
+        3
+      ],
+      "frame_index": 1
+    },
+    {
+      "body": {
+        "x": 0.25,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.5133,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": 1.55,
+            "y": 0.3536
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -1.1344,
+          "theta2": -1.0315,
+          "foot_world": {
+            "x": 1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -1.1344,
+          "theta2": -1.0315,
+          "foot_world": {
+            "x": -1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.5133,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": -0.45,
+            "y": 0.3536
+          }
+        }
+      ],
+      "planted_legs": [
+        1,
+        2
+      ],
+      "free_legs": [
+        0,
+        3
+      ],
+      "frame_index": 2
+    },
+    {
+      "body": {
+        "x": 0.375,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.7824,
+          "theta2": -0.8795,
+          "foot_world": {
+            "x": 1.975,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -1.2199,
+          "theta2": -0.9931,
+          "foot_world": {
+            "x": 1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -1.2199,
+          "theta2": -0.9931,
+          "foot_world": {
+            "x": -1.0,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.7824,
+          "theta2": -0.8795,
+          "foot_world": {
+            "x": -0.025,
+            "y": 0.0
+          }
+        }
+      ],
+      "planted_legs": [
+        1,
+        2
+      ],
+      "free_legs": [
+        0,
+        3
+      ],
+      "frame_index": 3
+    },
+    {
+      "body": {
+        "x": 0.5,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.804,
+          "theta2": -0.9502,
+          "foot_world": {
+            "x": 1.975,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.8965,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": 1.2,
+            "y": 0.3536
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -0.8965,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": -0.8,
+            "y": 0.3536
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.804,
+          "theta2": -0.9502,
+          "foot_world": {
+            "x": -0.025,
+            "y": 0.0
+          }
+        }
+      ],
+      "planted_legs": [
+        0,
+        3
+      ],
+      "free_legs": [
+        1,
+        2
+      ],
+      "frame_index": 4
+    },
+    {
+      "body": {
+        "x": 0.625,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.8378,
+          "theta2": -1.0021,
+          "foot_world": {
+            "x": 1.975,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.5738,
+          "theta2": -1.7722,
+          "foot_world": {
+            "x": 1.625,
+            "y": 0.5
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -0.5738,
+          "theta2": -1.7722,
+          "foot_world": {
+            "x": -0.375,
+            "y": 0.5
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.8378,
+          "theta2": -1.0021,
+          "foot_world": {
+            "x": -0.025,
+            "y": 0.0
+          }
+        }
+      ],
+      "planted_legs": [
+        0,
+        3
+      ],
+      "free_legs": [
+        1,
+        2
+      ],
+      "frame_index": 5
+    },
+    {
+      "body": {
+        "x": 0.75,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.8825,
+          "theta2": -1.0372,
+          "foot_world": {
+            "x": 1.975,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.5133,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": 2.05,
+            "y": 0.3536
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -0.5133,
+          "theta2": -1.5535,
+          "foot_world": {
+            "x": 0.05,
+            "y": 0.3536
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.8825,
+          "theta2": -1.0372,
+          "foot_world": {
+            "x": -0.025,
+            "y": 0.0
+          }
+        }
+      ],
+      "planted_legs": [
+        0,
+        3
+      ],
+      "free_legs": [
+        1,
+        2
+      ],
+      "frame_index": 6
+    },
+    {
+      "body": {
+        "x": 0.875,
+        "y": 1.9,
+        "theta": 0.0
+      },
+      "legs": [
+        {
+          "id": 0,
+          "theta1": -0.9368,
+          "theta2": -1.0568,
+          "foot_world": {
+            "x": 1.975,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 1,
+          "theta1": -0.7824,
+          "theta2": -0.8795,
+          "foot_world": {
+            "x": 2.475,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 2,
+          "theta1": -0.7824,
+          "theta2": -0.8795,
+          "foot_world": {
+            "x": 0.475,
+            "y": 0.0
+          }
+        },
+        {
+          "id": 3,
+          "theta1": -0.9368,
+          "theta2": -1.0568,
+          "foot_world": {
+            "x": -0.025,
+            "y": 0.0
+          }
+        }
+      ],
+      "planted_legs": [
+        0,
+        3
+      ],
+      "free_legs": [
+        1,
+        2
+      ],
+      "frame_index": 7
+    }
+  ]
+}

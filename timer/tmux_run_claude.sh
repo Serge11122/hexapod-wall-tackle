@@ -4,10 +4,10 @@
 # Usage: ./tmux_run_claude.sh <alias> [--model <model>] [--effort <low|medium|high>] [--thinking-off] [--thinking-on]
 #   alias: string like t_1_dev, t_1_eta, t_1_superv
 #
-# Model+effort are set via environment variables in the tmux session.
+# Defaults: --model sonnet (Sonnet 4.6), --effort medium, thinking disabled.
+# Model and effort are passed as `claude` CLI arguments (NOT env vars).
 # --thinking-off: sets CLAUDE_CODE_DISABLE_THINKING=1 (default for all sessions)
 # --thinking-on:  unsets CLAUDE_CODE_DISABLE_THINKING (enables adaptive thinking)
-# --effort: sets CLAUDE_CODE_EFFORT_LEVEL (low|medium|high)
 #
 # Session name == alias (deterministic, no epoch suffix).
 # Always uses -n (new named session). Timer sessions don't rely on Claude context
@@ -24,17 +24,19 @@ fi
 
 ALIAS="$1"; shift
 SESSION_NAME="$ALIAS"
-MODEL_FLAG=""
-# Defaults: thinking disabled, effort low
-THINKING_ENV="export CLAUDE_CODE_DISABLE_THINKING=1"
-EFFORT_ENV="export CLAUDE_CODE_EFFORT_LEVEL=low"
+# Defaults: model sonnet (Sonnet 4.6), effort medium, thinking disabled
+MODEL_FLAG="--model sonnet"
+EFFORT_FLAG="--effort medium"
+# THINKING_ENV="export CLAUDE_CODE_DISABLE_THINKING=1"
+#   export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50; \
+#   $THINKING_ENV; \
 
 while [ -n "$1" ]; do
     case "$1" in
         --model) MODEL_FLAG="--model $2"; shift 2 ;;
-        --effort) EFFORT_ENV="export CLAUDE_CODE_EFFORT_LEVEL=$2"; shift 2 ;;
-        --thinking-off) THINKING_ENV="export CLAUDE_CODE_DISABLE_THINKING=1"; shift ;;
-        --thinking-on)  THINKING_ENV="unset CLAUDE_CODE_DISABLE_THINKING"; shift ;;
+        --effort) EFFORT_FLAG="--effort $2"; shift 2 ;;
+        # --thinking-off) THINKING_ENV="export CLAUDE_CODE_DISABLE_THINKING=1"; shift ;;
+        # --thinking-on)  THINKING_ENV="unset CLAUDE_CODE_DISABLE_THINKING"; shift ;;
         *) shift ;;
     esac
 done
@@ -51,16 +53,13 @@ fi
 tmux set-option -g history-limit 50000 2>/dev/null || true
 tmux set-option -g mouse on 2>/dev/null || true
 
-CLAUDE_CMD="claude --dangerously-skip-permissions --permission-mode bypassPermissions -n \"$SESSION_NAME\" $MODEL_FLAG"
+CLAUDE_CMD="claude --dangerously-skip-permissions --permission-mode bypassPermissions -n \"$SESSION_NAME\" $MODEL_FLAG $EFFORT_FLAG"
 
 tmux new-session -d -s "$SESSION_NAME" -x 120 -y 40 \
   "bash -lc 'cd $current_dir; \
   export TERM=screen-256color; \
   export COLUMNS=120; \
   export LINES=40; \
-  export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50; \
-  $THINKING_ENV; \
-  $EFFORT_ENV; \
   $CLAUDE_CMD; \
   exec bash'"
 

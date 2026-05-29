@@ -62,7 +62,7 @@ Any stuck state identified in 3a-3l must be classified:
 - Permission prompt blocking session (routine tool approvals)
 - Spin loop with supervisor-fixable cause (NO_SCRIPT, FILE_NOT_FOUND, malformed JSON fields)
 
-**CODE ISSUE** — Supervisor must escalate to tdev:
+**CODE ISSUE** — Supervisor must escalate to tdev_inline:
 - tdeep found violations in conviction files
 - Missing gate markers (gate_unit.json, gate_smoke.json)
 - Wrong checkpoint configuration
@@ -77,7 +77,7 @@ For each stuck state found:
 2. Is the root cause in code logic or infrastructure state?
 3. Can supervisor fix it WITHOUT modifying project .py files?
    - YES → Timer issue, fix directly (Step 5)
-   - NO → Code issue, escalate to tdev (Step 5e)
+   - NO → Code issue, escalate to tdev_inline (Step 5e)
 
 If uncertain, default to ESCALATE. Supervisor has no authority over project code.
 ```
@@ -154,7 +154,7 @@ Otherwise, for TIMER issues identified in steps 3a-3l:
 **Current location:** After "5d. Timer restart" subsection (after line 351), add new subsection:
 
 ```markdown
-**5e. Code Issue Escalation to tdev:**
+**5e. Code Issue Escalation to tdev_inline:**
 
 If step 4 identified a CODE ISSUE (via 3m classification):
 
@@ -165,7 +165,7 @@ Supervisor does NOT attempt to fix code logic. Instead:
 # Supervisor Diagnostics — [PST timestamp]
 
 ## Issue Detected
-**Type:** Code Issue (requires tdev implementation)
+**Type:** Code Issue (requires tdev_inline implementation)
 
 **Evidence:**
 [Describe the stuck state and why supervisor cannot fix it]
@@ -178,21 +178,21 @@ Example: "tdeep found gate_unit.json not written by code. This requires train.py
 [Explain why this is not a timer/orchestration issue]
 
 ## Escalation Actions
-1. Set timer_cycle_state.json next_step=2 (route to tdev for code fixes)
+1. Set timer_cycle_state.json next_step=2 (route to tdev_inline for code fixes)
 2. Wrote this diagnostic file
 3. Exited supervisor run
 
-## Next Steps for tdev
+## Next Steps for tdev_inline
 - Read deep_analysis_results.md for specific violations
 - Read conviction files to understand violation intent
 - Implement code fixes (modify .py files as required)
 - Commit changes
 - Write launch_commands.json if needed
-- Cycle resumes: tconv → tdev → tdeep → launch
+- Cycle resumes: tconv → tdev_inline → tdeep → launch
 ```
 2
 
-2. **Update timer_cycle_state.json** to route to tdev:
+2. **Update timer_cycle_state.json** to route to tdev_inline:
 ```bash
 cat > /tmp/state_new.json <<'EOF'
 {
@@ -200,7 +200,7 @@ cat > /tmp/state_new.json <<'EOF'
   "next_step": 2,
   "status": "escalated_to_tdev",
   "long_running_pid": "$TRACKED_PID",
-  "escalation_reason": "Code violations detected by tdeep — tdev implementation required"
+  "escalation_reason": "Code violations detected by tdeep — tdev_inline implementation required"
 }
 EOF
 # Use atomic replacement
@@ -209,15 +209,15 @@ mv /tmp/state_new.json .manager/timer_cycle_state.json
 
 3. **Exit supervisor run** with clear message:
 ```
-"Code violations detected. Escalated to tdev for implementation.
-Next cycle: tdev will read violations, fix code, and cycle resumes."
+"Code violations detected. Escalated to tdev_inline for implementation.
+Next cycle: tdev_inline will read violations, fix code, and cycle resumes."
 ```
 
 **On next timer tick:**
-- timer-dev reads next_step=2, sends /tdev
-- tdev subagent reads supervisor_diagnostics.md + deep_analysis_results.md
-- tdev implements code fixes and commits
-- Cycle continues: tconv → tdev (fix applied) → tdeep (re-validate) → launch
+- timer-dev reads next_step=2, sends /tdev_inline
+- tdev_inline subagent reads supervisor_diagnostics.md + deep_analysis_results.md
+- tdev_inline implements code fixes and commits
+- Cycle continues: tconv → tdev_inline (fix applied) → tdeep (re-validate) → launch
 
 **IMPORTANT:** Supervisor does not judge whether code is "correct enough." Supervisor only detects that code fixes are needed and escalates.
 ```
@@ -245,7 +245,7 @@ After this paragraph, add:
 ```markdown
 **Clarification:** Root cause investigation here means understanding TIMER/ORCHESTRATION issues.
 If the root cause is CODE-related (violations found by tdeep, missing gate markers, etc.), 
-that is NOT within scope of this investigation. Stop, classify as CODE issue, escalate to tdev.
+that is NOT within scope of this investigation. Stop, classify as CODE issue, escalate to tdev_inline.
 ```
 
 ---
@@ -310,8 +310,8 @@ Replace "Issues Found", "Root Cause", and "Actions Taken" sections with:
 ### Timer Issues (Supervisor Fixed)
 - [issue description and fix applied, or "None"]
 
-### Code Issues (Escalated to tdev)
-- [issue description, escalation action, and next steps for tdev, or "None"]
+### Code Issues (Escalated to tdev_inline)
+- [issue description, escalation action, and next steps for tdev_inline, or "None"]
 
 ### Unclear Issues (Subagent Diagnosis)
 - [issue and subagent findings, or "None"]
@@ -329,8 +329,8 @@ Replace "Issues Found", "Root Cause", and "Actions Taken" sections with:
 ### Timer Fixes (Supervisor)
 - [fixes applied directly: commands run, files modified, restarts performed, or "None"]
 
-### Escalations (To tdev)
-- [diagnostic files written, state changes made to route to tdev, or "None"]
+### Escalations (To tdev_inline)
+- [diagnostic files written, state changes made to route to tdev_inline, or "None"]
 ```
 
 ---
@@ -351,7 +351,7 @@ The log format is already correct. It reports brief summaries, not detailed acti
 |---------|--------|------|--------|
 | Step 4, after 3l | Add new check 3m: Code vs Timer classification | Addition | CRITICAL — enables supervisor to correctly route issues |
 | Step 5 intro | Clarify Step 5 is Timer-only, redirect Code to 5e | Revision | CRITICAL — prevents supervisor from attempting code fixes |
-| Step 5, after 5d | Add new section 5e: Escalation pattern | Addition | CRITICAL — enables supervisor to escalate to tdev |
+| Step 5, after 5d | Add new section 5e: Escalation pattern | Addition | CRITICAL — enables supervisor to escalate to tdev_inline |
 | Step 5d | Add clarification about code vs timer root causes | Addition | Minor — prevents confusion about scope |
 | Step 8 (Report) | Restructure to classify issues as Timer/Code/Unclear | Revision | Important — improves visibility and accountability |
 | Step 9 (Log) | No changes needed | N/A | OK |
@@ -391,7 +391,7 @@ After SKILL.md is updated:
 - Verify supervisor detects violation, classifies as CODE issue
 - Verify supervisor writes supervisor_diagnostics.md
 - Verify supervisor sets next_step=2
-- Verify supervisor_report.md shows "Code Issues (Escalated to tdev)"
+- Verify supervisor_report.md shows "Code Issues (Escalated to tdev_inline)"
 
 ### Test 3: Detect Timer Issue
 - Manually create a stale eta_done_1.json file (set timestamp to 15 min ago)

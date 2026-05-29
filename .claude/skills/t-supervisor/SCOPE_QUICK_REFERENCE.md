@@ -6,7 +6,7 @@
 
 ## The Rule
 
-**Supervisor owns TIMER/ORCHESTRATION. tdev owns PROJECT CODE.**
+**Supervisor owns TIMER/ORCHESTRATION. tdev_inline owns PROJECT CODE.**
 
 If supervisor can fix it WITHOUT modifying .py files → **FIX IT**.
 If it requires changing code logic or .py files → **ESCALATE TO TDEV**.
@@ -56,10 +56,10 @@ Is it TIMER/INFRASTRUCTURE?     Is it CODE/LOGIC?
 | Issue | Why Escalate |
 |-------|--------------|
 | tdeep violation: gate_unit.json missing | Code must write gate markers — requires train.py change |
-| tdeep violation: checkpoint_every=2000 | Config is project-specific — only tdev understands context |
-| tdeep violation: uncomm itted .py changes | Code ownership and commit authority = tdev responsibility |
+| tdeep violation: checkpoint_every=2000 | Config is project-specific — only tdev_inline understands context |
+| tdeep violation: uncomm itted .py changes | Code ownership and commit authority = tdev_inline responsibility |
 | tdeep violation: epoch loop found | Code logic change required — not supervisor's domain |
-| kill_violations.md: bad metrics | May indicate code issue — let tdev analyze |
+| kill_violations.md: bad metrics | May indicate code issue — let tdev_inline analyze |
 | Import error or syntax error | Code fix required |
 
 **Key:** Any issue that requires understanding "why" or changing .py files = escalate.
@@ -74,16 +74,16 @@ Is it TIMER/INFRASTRUCTURE?     Is it CODE/LOGIC?
 # Supervisor Diagnostics — [timestamp from: TZ='America/Los_Angeles' date '+%Y-%m-%d %H:%M PT']
 
 ## Issue Detected
-**Type:** Code Issue (requires tdev implementation)
+**Type:** Code Issue (requires tdev_inline implementation)
 
 ## Evidence
 [Copy the specific violation and what made supervisor detect the stuck state]
 
 ## Escalation Actions
-1. Set timer_cycle_state.json next_step=2 (route to tdev)
+1. Set timer_cycle_state.json next_step=2 (route to tdev_inline)
 2. Exited supervisor run
 
-## Next Steps for tdev
+## Next Steps for tdev_inline
 - Read deep_analysis_results.md
 - Read conviction files
 - Implement code fixes
@@ -100,14 +100,14 @@ cat > .manager/timer_cycle_state.json <<EOF
   "next_step": 2,
   "status": "escalated_to_tdev",
   "long_running_pid": "$(grep -o '"long_running_pid": *"[^"]*"' .manager/timer_cycle_state.json | cut -d'"' -f4)",
-  "escalation_reason": "Code violations detected — tdev implementation required"
+  "escalation_reason": "Code violations detected — tdev_inline implementation required"
 }
 EOF
 ```
 
 ### 3. Exit
 
-Supervisor exits. Timer-dev will send /tdev on next tick.
+Supervisor exits. Timer-dev will send /tdev_inline on next tick.
 
 ---
 
@@ -179,14 +179,14 @@ cat > .manager/supervisor_diagnostics.md <<'EOF'
 # Supervisor Diagnostics — [timestamp]
 
 ## Issue Detected
-**Type:** Code Issue (requires tdev implementation)
+**Type:** Code Issue (requires tdev_inline implementation)
 
 ## Evidence
 tdeep found: gate_unit.json not written by train.py.
 This requires modifying train.py to write the gate marker for unit-test run type.
 
 ## Escalation Actions
-Set next_step=2 to route to tdev for code fix.
+Set next_step=2 to route to tdev_inline for code fix.
 EOF
 
 # Update state
@@ -202,9 +202,9 @@ EOF
 ```
 
 **Next Cycle:**
-- tdev reads supervisor_diagnostics.md + deep_analysis_results.md
-- tdev modifies train.py to write gate_unit.json for run_type=="unit"
-- tdev commits changes
+- tdev_inline reads supervisor_diagnostics.md + deep_analysis_results.md
+- tdev_inline modifies train.py to write gate_unit.json for run_type=="unit"
+- tdev_inline commits changes
 - Cycle resumes: tconv → tdeep (re-validates) → launch
 
 **Result:** Code fixed via proper channel, no bypass needed.
@@ -222,30 +222,30 @@ cat > .manager/supervisor_diagnostics.md <<'EOF'
 # Supervisor Diagnostics — [timestamp]
 
 ## Issue Detected
-**Type:** Code Issue (requires tdev implementation)
+**Type:** Code Issue (requires tdev_inline implementation)
 
 ## Evidence
 tdeep found uncomm itted changes to .py files.
-tdev must review, commit, or stash these changes.
+tdev_inline must review, commit, or stash these changes.
 
 ## Escalation Actions
-Set next_step=2 to route to tdev for review and commit.
+Set next_step=2 to route to tdev_inline for review and commit.
 EOF
 
-# Update state (route to tdev)
+# Update state (route to tdev_inline)
 cat > .manager/timer_cycle_state.json <<EOF
 {
   "cycle": ...,
   "next_step": 2,
   "status": "escalated_to_tdev",
   "long_running_pid": "",
-  "escalation_reason": "Uncomm itted .py changes — tdev review required"
+  "escalation_reason": "Uncomm itted .py changes — tdev_inline review required"
 }
 EOF
 ```
 
 **Next Cycle:**
-- tdev reads diff, decides:
+- tdev_inline reads diff, decides:
   - Changes are good → `git commit`
   - Changes are debug → `git checkout .`
 - Cycle resumes automatically
@@ -280,7 +280,7 @@ In supervisor_report.md, use this structure:
 ### Timer Issues (Supervisor Fixed)
 - [description and fix, or "None"]
 
-### Code Issues (Escalated to tdev)
+### Code Issues (Escalated to tdev_inline)
 - [description and escalation, or "None"]
 
 ### Unclear (Subagent Investigation)
@@ -297,7 +297,7 @@ In supervisor_report.md, use this structure:
 - If you need to modify a .py file → STOP, ESCALATE
 - If you're not sure → default to ESCALATE (better safe than wrong)
 
-The boundary is there for a reason: tdev has project context; supervisor does not.
+The boundary is there for a reason: tdev_inline has project context; supervisor does not.
 
 ---
 

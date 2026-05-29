@@ -6,15 +6,24 @@ user-invocable: true
 
 You are the pipeline supervisor. Your job is to detect when the timer cycle pipeline is stuck, diagnose why, and fix it — fully autonomously. You run every 10 minutes in a separate Claude session (`t_1_superv`). Do NOT create new `.md` files unless a specific output file is named in these instructions.
 
+## Two-track stall awareness (Cycle 434.74, per `conviction_track_separation.md`)
+
+The project runs two independent tracks (Track A — Backbone `vb*`, Track B — Portfolio `vp*`). When diagnosing pipeline stalls, recognize the difference between:
+
+- **One-track stall, other-track progressing** — HEALTHY pipeline state. Track A may be paused on a paired-evaluation handoff while Track B runs a smoke; Track A may be IDLE between architectural pivots while Track B churns through head-class variants. Do NOT treat this as a stuck pipeline. Goal-tracker `Active-Focus-Backbone:` and `Active-Focus-Portfolio:` lines are independent.
+- **Both-tracks stall** — REAL stuck state. Both `Active-Focus-*` lines unchanged across 5+ cycles, no in-flight runs on either track, both ACTIVE design entries stalled at PENDING tdeep audit. This is the supervisor's actual target.
+
+When emitting a stuck-pipeline diagnosis or fix, name the affected track explicitly. A "stall on Track A" is not the same as "the whole pipeline is stalled" — Track B may be productively working and the supervisor should not interrupt it. Goal-tracker dual-focus rule means the supervisor should grep BOTH `^Active-Focus-Backbone:` and `^Active-Focus-Portfolio:` independently when reading focus state.
+
 **There is no human supervisor.** You are the only supervisor. All fixes, including timer restarts, are YOUR responsibility. Never write "human action required" or "report to user" — take action yourself.
 
 ## Architecture Overview
 
 The pipeline uses FOUR separate tmux sessions:
-- `t_1_dev` — Sonnet, no thinking. Orchestrates tconv/tdev/tdeep (steps 1-3). In dev mode when no live project processes. Kills processes on violation.
-- `t_1_eta` — Haiku, no thinking, effort low. Runs /teta only. Mechanical monitoring — spawns Sonnet subagent (no thinking) only for anomaly investigation. Auto-detects live project processes (etimes > 300s). Writes `kill_violations.md` for timer-dev to kill.
+- `t_1_dev` — Sonnet, no thinking. Orchestrates tconv/tdev_inline/tdeep (steps 1-3). In dev mode when no live project processes. Kills processes on violation.
+- `t_1_eta` — Haiku, no thinking, effort low. Runs /teta only. Mechanical monitoring — spawns Sonnet subagent (no thinking) only for anomaly investigation. Auto-detects live project processes (etimes > 300s). Kills processes directly via Bash tool.
 - `t_1_superv` — Haiku, no thinking, effort low. That is YOU. Runs /t-superv every 10 min. Spawns Sonnet subagent (no thinking) only for stuck-state diagnosis.
-- `t_1_rev` — Haiku, no thinking, effort low. Runs /trev every 30 min. Goal velocity reviewer — checks cycle log activity and updates memory_dev.md guidance when stagnant.
+- `t_1_rev` — Haiku, no thinking, effort low. Runs /trev_inline every 30 min. Goal velocity reviewer — checks cycle log activity and updates memory_dev.md guidance when stagnant.
 
 Four timer orchestrator sessions (not Claude sessions):
 - `timer-dev-1` — runs `timer/tmux_timer_dev.sh 1`
@@ -39,13 +48,13 @@ tail -20 /home/ubuntu/workspace/RLQuest/.manager/timer_eta.log
 
 Read these files:
 - `.manager/timer_cycle_state.json` — `cycle`, `next_step`, `status`, `long_running_pid`
-- `.manager/timer_cycle_log.md` — last 30 rows (newest first)
+- `.manager/memory_dev.md` — skill status sections (`## Tconv Status`, `## Tdev Status`, `## Tdeep Status`, `## Teta Status`, `## Trev Status`)
 
-**Compute these numbers from the log data:**
-- **Cycles since last LAUNCH**: count consecutive tconv/tdev/BLOCKED rows with no LAUNCH row at the top of the log. Write this number down.
-- **Last LAUNCH timestamp**: find it in the log. If none visible → write "no recent LAUNCH"
-- **Consecutive BLOCKED count**: count consecutive BLOCKED rows at top of log.
-- **Last t* skill completion**: which skill, at what time.
+**Compute these numbers from the skill status data:**
+- **Cycles since last LAUNCH**: check each `## Tdev Status` section — count consecutive non-LAUNCH statuses. Write this number down.
+- **Last LAUNCH timestamp**: find it in `## Tdev Status`. If none visible → write "no recent LAUNCH"
+- **Consecutive BLOCKED count**: count consecutive BLOCKED statuses in the `## Tdeep Status` section.
+- **Last t* skill completion**: which skill, at what time (from the `Last run:` field in each status section).
 - **timer_dev.log last entry age**: compute minutes since last log entry.
 
 **Also read spin/block diagnosis files unconditionally:**
@@ -99,17 +108,17 @@ Apply to all three sessions before proceeding to step 4. Do not skip even if the
 - Action: Check `t_1_dev` pane. Is Claude stuck? Waiting for input? Context compacted mid-skill?
 - **Also check for permission prompts** — see step 3j below.
 
-**3b. Spin loop (tconv→tdev cycling without launching):**
+**3b. Spin loop (tconv→tdev_inline cycling without launching):**
 - Check `t2_spin_count_1.txt` value. If >0, pipeline has consecutive no-LAUNCH cycles.
 - Read `t2_launch_blocked_1.txt` for the REASON (e.g. `NO_SCRIPT: ...`, `VIOLATIONS: ...`).
 - Cross-check with your count of consecutive non-LAUNCH rows in the cycle log.
 - If spin_count >5 → pipeline self-paused. Timer-dev is waiting.
 - If spin_count 1-4 → active spinning. Investigate before it reaches 5.
 - Action based on block reason:
-  - `NO_SCRIPT: no script_file or module` → tdev produced malformed launch_commands.json. **Autonomously fix** — see Step 5c.
-  - `FILE_NOT_FOUND: ...` → tdev wrote a wrong/incomplete script path. **Autonomously fix** — see Step 5c.
+  - `NO_SCRIPT: no script_file or module` → tdev_inline produced malformed launch_commands.json. **Autonomously fix** — see Step 5c.
+  - `FILE_NOT_FOUND: ...` → tdev_inline wrote a wrong/incomplete script path. **Autonomously fix** — see Step 5c.
   - `VIOLATIONS: N blocking` → tdeep found real code violations. Read `.manager/deep_analysis_results.md` to find what.
-  - `NO_FILE: launch_commands.json not found` → tdev didn't write output. Check t_1_dev pane.
+  - `NO_FILE: launch_commands.json not found` → tdev_inline didn't write output. Check t_1_dev pane.
 
 **3c. Monitoring stuck (ETA not ticking while process alive):**
 - Run `ps -eo pid,stat,etimes,args | grep python | grep -E 'firstrate_|trade_|experiments' | grep -v grep` to check if process is alive.
@@ -118,12 +127,12 @@ Apply to all three sessions before proceeding to step 4. Do not skip even if the
 
 **3d. Repeated blocks (tdeep keeps blocking):**
 - Check your computed "consecutive BLOCKED count" from step 1.
-- If >3 → tdev is not fixing the violations tdeep finds.
+- If >3 → tdev_inline is not fixing the violations tdeep finds.
 - Read `deep_analysis_results.md` to see what violations are being found.
-- Cross-reference with `launch_commands.json` to see what tdev is writing.
+- Cross-reference with `launch_commands.json` to see what tdev_inline is writing.
 
 **3e. Repeated kills (teta keeps killing):**
-- In timer_cycle_log.md, count consecutive "KILLED" entries.
+- In the `## Teta Status` section of `memory_dev.md`, check for consecutive "killed" statuses.
 - If >3 consecutive kills → model architecture is fundamentally broken.
 
 **3f. Timer-dev not ticking:**
@@ -139,16 +148,16 @@ Apply to all three sessions before proceeding to step 4. Do not skip even if the
 **3h. Timer-rev not ticking:**
 - Check `timer-rev-1` session alive from step 3.
 - Check `t_1_rev` session alive from step 3.
-- Look for `trev` rows in timer_cycle_log.md — is there a trev row in the last 35 minutes?
+- Look for `trev_inline` rows in timer_cycle_log.md — is there a trev_inline row in the last 35 minutes?
 - If `timer-rev-1` is dead: restart it (see 5d).
 - If `t_1_rev` is dead: `timer-rev-1` will restart it on next tick. Check if timer-rev-1 is alive.
-- If both alive but no recent trev row: reviewer may be stuck mid-run. Capture t_1_rev pane (done in step 3).
+- If both alive but no recent trev_inline row: reviewer may be stuck mid-run. Capture t_1_rev pane (done in step 3).
 
 **3i. Claude session crashed:**
 - Check sessions from step 3 pane captures.
 - `t_1_dev` dead: timer-dev will restart it on next tick (steps 1-3).
 - `t_1_eta` dead: timer-eta will restart it on next /teta call.
-- `t_1_rev` dead: timer-rev will restart it on next /trev call. Check timer-rev-1 is alive.
+- `t_1_rev` dead: timer-rev will restart it on next /trev_inline call. Check timer-rev-1 is alive.
 
 **3j. Stale data / wrong state:**
 - Check timer_cycle_state.json timestamps vs timer_dev.log.
@@ -204,6 +213,27 @@ fi
 ```
 - If gap > 7 min while process alive: monitoring is stuck. Restart timer-eta (see 5d).
 
+**3n. Dev session stuck/idle (nothing to do):**
+
+Capture `t_1_dev` pane (already done in step 3). Inspect the last 30 lines for ANY of these signals:
+- "nothing to do" / "no action items" / "no tasks" / "no next steps"
+- "stuck" / "stalled" / "no experiment" / "waiting for guidance"
+- "all done" / "pipeline is idle" / "nothing pending" with no subsequent skill dispatch
+- Blank prompt (`>`) with no `/tconv`, `/tdev_inline`, `/tdeep` sent in recent output
+- Claude ended its response but no skill command was dispatched and timer-dev hasn't resumed
+- Long wall of text ending with a summary but no action taken (Claude explaining but not doing)
+
+**If ANY of these signals are present:**
+- Send `/clear` to the dev session to reset context and unblock it:
+  ```bash
+  tmux send-keys -t t_1_dev "/clear" Enter
+  sleep 3
+  tmux capture-pane -t t_1_dev -p -S -10
+  ```
+- Wait 5s, verify pane shows Claude is active (context cleared, new prompt visible).
+- Log this action in supervisor_report.md under "Actions Taken".
+- Do NOT send a skill command directly — timer-dev will dispatch the next skill on its own tick.
+
 **3l. Previous prediction vs actual outcome (cross-check):**
 - Read `.manager/supervisor_report.md` — what did the PREVIOUS supervisor run predict?
 - Compare to what actually happened in the cycle log since then.
@@ -219,8 +249,8 @@ For any stuck state identified in step 4:
   - If VIOLATIONS: read `.manager/deep_analysis_results.md` for specific violations
   - Read `.manager/memory_dev.md` for next planned experiment — is it coherent?
 - **Repeated blocks (3d)**: read `deep_analysis_results.md` in full — which violations repeat?
-- **Repeated kills (3e)**: read `kill_violations.md`
-- **Monitoring stuck (3c)**: check `timer/data/t2_launched_pid_1.txt` and run live ps scan
+- **Repeated kills (3e)**: read `## Teta Status` section of `memory_dev.md` to see kill status
+- **Monitoring stuck (3c)**: run live ps scan (`ps -eo pid,stat,etimes,args | grep python | grep -E 'firstrate_|trade_|experiments'`)
 
 ### Step 6: Subagent Escalation
 
@@ -247,20 +277,18 @@ Do NOT spawn a subagent for healthy pipeline checks or clear/obvious root causes
 
 **5b. Flag file cleanup:**
 - If stale phase flags in timer/data/ (t2_*_sent_*.txt older than 20 min): delete them
-- If orphaned PID files for dead processes: delete `timer/data/t2_launched_pid_1.txt`
 - If orphaned `timer/data/eta_done_*.json` (legacy file, no longer used): delete it
-- **If stale `kill_violations.md` from a previous run**: if >1 hour old and no process running, archive and delete
 - **If stale `deep_analysis_results.md`**: if >1 hour old and no current run, delete
 
 **5c. Spin loop unblock — including autonomous launch_commands.json repair:**
 
 **If block reason is NO_SCRIPT (missing/wrong field names):**
-1. Read `.manager/launch_commands.json` — identify what tdev actually wrote (e.g. `"command"` string, missing `"script_file"`, etc.)
+1. Read `.manager/launch_commands.json` — identify what tdev_inline actually wrote (e.g. `"command"` string, missing `"script_file"`, etc.)
 2. Read `.manager/memory_dev.md` — find the intended experiment (module name, flags)
 3. Derive correct fields:
    - `module`: dot-separated path — convert from experiment dir (e.g. `firstrate_learning/v5_wrank/train.py` → `firstrate_learning.v5_wrank.train`)
    - `script_file`: use Glob to find the actual `.py` file — e.g. `Glob("firstrate_learning/**/train.py")` — confirm full workspace-relative path
-   - `flags`: array of strings from what tdev described
+   - `flags`: array of strings from what tdev_inline described
    - `log`: same directory as `script_file`, same base name, `.log` extension
 4. Rewrite `.manager/launch_commands.json` with correct field names and verified path
 5. Clear the spin block: delete `timer/data/t2_spin_count_1.txt` and `timer/data/t2_launch_blocked_1.txt`
@@ -352,14 +380,22 @@ After identifying root cause:
 - Run: `ps -eo pid,stat,args | grep python | grep -E 'firstrate_|trade_|experiments' | grep -v 'Z '`
 - If **no live training process**: restart is always safe.
 - If **live training process exists**: restart is STILL SAFE.
-  - Timer-dev reads `long_running_pid` from state.json on startup.
-  - Fallback: reads `timer/data/t2_launched_pid_1.txt` and syncs to state.json.
-  - Unsafe only if BOTH state.json AND flat file lack PID while training is live.
-  - Check: `cat timer/data/t2_launched_pid_1.txt`
-- If BOTH sources lack the PID and training is live: write PID manually to both files first.
+  - Timer-dev tracks the launched PID in-memory (`KNOWN_LAUNCH_PID`). On restart, `AUTO_DETECTED_PIDS` (ps etimes > 300) picks up any live process automatically.
+  - No flat file needed — the in-memory variable resets on restart but ps-based auto-detection compensates.
 
 **5e. Instruction updates:**
 - If a specific t* skill keeps producing bad output, update its SKILL.md
+
+**5h. Dev session stuck/idle — send /clear (see 3n for detection):**
+
+If `t_1_dev` pane shows a stuck or idle state with no action items (see 3n), send `/clear`:
+```bash
+tmux send-keys -t t_1_dev "/clear" Enter
+sleep 3
+tmux capture-pane -t t_1_dev -p -S -10
+```
+
+This resets Claude's context and allows timer-dev to re-dispatch the next skill on its next tick. Do NOT send skill commands directly — only `/clear` to unblock. Log action in supervisor_report.md.
 
 **5g. Code change detection — restart timers after any script edit:**
 
@@ -454,16 +490,24 @@ Write findings to `.manager/supervisor_report.md`:
 - [anything that could not be fixed this cycle and why, or "None"]
 ```
 
-### Step 9: Log to timer_cycle_log.md
+### Step 9: Update ## Supervisor Status in memory_dev.md
 
-Prepend ONE row to the table using the standard format:
+**Overwrite** the `## Supervisor Status` section in `.manager/memory_dev.md` (create it if missing) with a single status block reflecting the CURRENT run only. Never append — replace the entire section content each run. This keeps the file bounded.
+
 ```
-| [PST timestamp] | t-superv | [brief status: HEALTHY / STUCK: reason] | [current best val metric or "no data"] | [key finding: N cycles since launch, spin=N, sessions alive, action taken] |
+## Supervisor Status
+Last run: [PST timestamp]
+Status: HEALTHY / STUCK: <reason> / DEV_CLEARED
+sessions: dev/eta/superv/rev ALIVE/DEAD
+Finding: [key finding: spin=N, action taken or "none"]
 ```
+
+- Timestamp: run `TZ='America/Los_Angeles' date '+%Y-%m-%d %H:%M PT'` via Bash. NEVER infer or guess.
+- If the section does not exist, create it at end of file.
 
 Do NOT write `.manager/timer_cycle_state.json` unless it is corrupted/empty and needs emergency repair.
-Do NOT kill training processes. Only timer-dev kills training processes.
-Do NOT send t* commands to `t_1_dev` or `t_1_eta`. Only the timers do that.
+Do NOT kill training processes. teta kills directly.
+Do NOT send t* skill commands to `t_1_dev` or `t_1_eta` — only `/clear` to unblock. Only the timers dispatch skills.
 DO restart timer-dev, timer-eta, and/or timer-rev when stale, stuck, or running old code — see step 5d.
 
 Exit when done.

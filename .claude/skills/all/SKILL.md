@@ -1,7 +1,7 @@
 ---
 name: all
 description: Combined skill set: coding agent safety rules, explicit error handling, and Python package setup. Always active during code actions.
-user-invocable: true
+user-invocable: false
 ---
 
 # All Skills
