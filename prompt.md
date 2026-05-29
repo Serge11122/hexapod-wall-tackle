@@ -29,3 +29,35 @@ refine the motion of the robot json frame poses definitions by using the robot v
 refine the entire system and all components until valid and successful simulation rendering output frames and videos are working in the robot_vis render_locomotion.py video and frame outputs. review the outputs frames, and iterate and refine the simulation and impleemnted code until the robot successfully walks left and right in its simulation rendering and enviornment 3 body lengths in each direction.
 
 IMPORTANT — no hardcoded body motion: the body's horizontal translation must emerge entirely from causal physics. specifically: the leg joint angles drive foot positions, foot-to-floor contact forces (normal force + friction) react against the environment segments, and the resulting net force/impulse on the robot body is what accelerates it left or right. there must be no direct velocity assignment, no external drive force applied to the body, and no teleportation of body position. the only inputs to the physics engine are (a) gravity, (b) joint torques or prescribed joint-angle trajectories acting through the leg linkage, and (c) contact/friction forces computed from foot-environment penetration and relative velocity. if the leg gait produces no net horizontal ground-reaction force, the body must not move horizontally. locomotion must be a consequence of the simulation, not an assumption built into it.
+
+PHYSICS ENGINE: pymunk 7.2.0 (Chipmunk2D Python bindings) — installed in .venv.
+Run with: .venv/bin/python -m robot_vis.render_simulation_left_right
+The .venv has include-system-site-packages = true to inherit system numpy, Pillow.
+
+PHYSICS MODEL (implemented in robot_environment/contact_physics.py — RobotPhysics class):
+  Single source of truth: all body/leg positions come from pymunk. No custom FK in renderer.
+  No divergence between physics and rendering is structurally possible.
+
+  Robot model:
+  - Body: pymunk.Body (BODY_MASS, moment_for_box) + Poly.create_box shape
+  - Each leg (4 total): two rigid segment bodies (upper=L1=1.0, lower=L2=1.2) connected
+    by PinJoint at hip and knee, plus SimpleMotor at each joint for gait control
+  - Self-collision disabled via ShapeFilter(group=1) on all robot shapes
+  - Floor/walls: static Segment shapes with friction=STATIC_FRICTION=0.8
+
+  Control:
+  - Target joint angles come from the gait JSON each frame
+  - PD motor controller: motor.rate = KP * angle_error  (KP=8, max_force=15 N·m)
+  - max_force is below the friction slip threshold (μ×N ≈ 18 N·m/leg) to prevent slipping
+  - 40 physics sub-steps per rendered frame (sub_dt = 0.2/40 = 0.005 s) for stability
+
+  Constraints:
+  - GrooveJoint: constrains body COM to slide horizontally at WALK_HEIGHT=1.9
+    (replaces balance controller; body translates freely in x, y held by constraint)
+  - RotaryLimitJoint: hard pitch clamp ±10° on body angle
+  - SimpleMotor(static, body, 0): soft pitch damping (max_force=20 N·m), drives body.omega→0
+
+  Rendering:
+  - get_render_pose() queries pymunk body.position, body.angle, lower.local_to_world()
+  - No FK recomputation in renderer — positions read directly from physics engine
+  - Feet cannot sink through floor (pymunk contact prevents shape interpenetration)
