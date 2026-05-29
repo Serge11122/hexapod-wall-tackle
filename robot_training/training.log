@@ -157,3 +157,111 @@ PPO training [left]  iters=300  device=cuda
   iter  100/300 | dist=  0.5  rew=-226.4  succ=0.00 | L_pol=-0.0036  L_val=522.5805  t=143s
   → VAL dist=0.53
   iter  110/300 | dist=  0.3  rew=-1529.0  succ=0.00 | L_pol=-0.0012  L_val=855.8920  t=169s
+  iter  120/300 | dist=  2.0  rew=-491.1  succ=0.00 | L_pol=-0.0248  L_val=1080.2673  t=188s
+  → VAL dist=0.79
+  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
+  iter  130/300 | dist=  0.9  rew=-671.3  succ=0.00 | L_pol=-0.0082  L_val=868.6709  t=210s
+  iter  140/300 | dist=  0.6  rew=-1418.2  succ=0.00 | L_pol=-0.0127  L_val=527.7424  t=231s
+  → VAL dist=0.57
+  iter  150/300 | dist=  7.4  rew=-1316.5  succ=0.00 | L_pol=-0.0118  L_val=367.7097  t=254s
+  iter  160/300 | dist=  0.2  rew=-1462.6  succ=0.00 | L_pol=-0.0122  L_val=818.8197  t=274s
+  → VAL dist=0.51
+  iter  170/300 | dist=  0.7  rew=-1625.4  succ=0.00 | L_pol=-0.0258  L_val=646.3549  t=298s
+  iter  180/300 | dist=  1.1  rew=-1619.3  succ=0.00 | L_pol=-0.0094  L_val=914.3225  t=315s
+  → VAL dist=0.79
+  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
+  iter  190/300 | dist=  6.0  rew=-1386.9  succ=0.00 | L_pol=-0.0106  L_val=639.5683  t=339s
+  iter  200/300 | dist=  3.2  rew=-1245.8  succ=0.00 | L_pol=-0.0063  L_val=692.3825  t=354s
+  → VAL dist=0.39
+  iter  210/300 | dist=  0.4  rew=-1218.4  succ=0.00 | L_pol=-0.0194  L_val=568.0464  t=380s
+  iter  220/300 | dist=  0.4  rew=-1497.7  succ=0.00 | L_pol=-0.0100  L_val=537.3050  t=397s
+  → VAL dist=0.68
+  iter  230/300 | dist=  1.5  rew=-1023.4  succ=0.00 | L_pol=-0.0047  L_val=879.8901  t=422s
+  iter  240/300 | dist=  1.3  rew=-1827.7  succ=0.00 | L_pol=-0.0026  L_val=1173.2872  t=439s
+  → VAL dist=0.46
+  iter  250/300 | dist=  1.0  rew=-1620.8  succ=0.00 | L_pol=0.0002  L_val=1045.6203  t=462s
+  iter  260/300 | dist=  1.0  rew=-1750.2  succ=0.00 | L_pol=0.0027  L_val=771.1802  t=483s
+  → VAL dist=0.81
+  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
+  iter  270/300 | dist=  0.6  rew=-1393.8  succ=0.00 | L_pol=0.0016  L_val=816.3394  t=506s
+  iter  280/300 | dist=  1.1  rew=-1345.8  succ=0.00 | L_pol=-0.0005  L_val=699.6469  t=527s
+  → VAL dist=0.58
+  iter  290/300 | dist=  0.9  rew=-1433.6  succ=0.00 | L_pol=-0.0094  L_val=556.1941  t=551s
+  iter  300/300 | dist=  0.1  rew=-966.0  succ=0.00 | L_pol=-0.0228  L_val=511.5514  t=572s
+  → VAL dist=0.62
+
+Final model → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_final_left.pt
+Best val dist = 0.81
+
+[4] Evaluating on test set ...
+
+  [right] model: /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
+  Evaluating [right] primitive:seed8 ...
+    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/primitive_seed08.gif
+  Evaluating [right] primitive:seed0 ...
+    TIMEOUT  dist=0.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/primitive_seed00.gif
+  Evaluating [right] primitive:seed3 ...
+    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/primitive_seed03.gif
+  Evaluating [right] fbm_noise:seed19 ...
+    TIMEOUT  dist=1.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/fbm_noise_seed19.gif
+  Evaluating [right] fbm_noise:seed6 ...
+    TIMEOUT  dist=0.9  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/fbm_noise_seed06.gif
+  Evaluating [right] fbm_noise:seed17 ...
+    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/fbm_noise_seed17.gif
+  Evaluating [right] random_walk:seed18 ...
+    TIMEOUT  dist=1.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/random_walk_seed18.gif
+  Evaluating [right] random_walk:seed11 ...
+    TIMEOUT  dist=0.6  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/random_walk_seed11.gif
+  Evaluating [right] random_walk:seed3 ...
+    TIMEOUT  dist=2.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/random_walk_seed03.gif
+  Evaluating [right] spline:seed7 ...
+    TIMEOUT  dist=0.9  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/spline_seed07.gif
+  Evaluating [right] spline:seed1 ...
+    TIMEOUT  dist=1.6  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/spline_seed01.gif
+  Evaluating [right] spline:seed2 ...
+    TIMEOUT  dist=1.3  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/spline_seed02.gif
+  Evaluating [right] wfc:seed17 ...
+    TIMEOUT  dist=1.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/wfc_seed17.gif
+  Evaluating [right] wfc:seed5 ...
+    TIMEOUT  dist=1.0  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/wfc_seed05.gif
+  Evaluating [right] wfc:seed19 ...
+    TIMEOUT  dist=3.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/wfc_seed19.gif
+
+  [right] test results: 0/15 success  mean_dist=1.2
+
+  [left] model: /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
+  Evaluating [left] primitive:seed8 ...
+    TIMEOUT  dist=0.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/primitive_seed08.gif
+  Evaluating [left] primitive:seed0 ...
+    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/primitive_seed00.gif
+  Evaluating [left] primitive:seed3 ...
+    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/primitive_seed03.gif
+  Evaluating [left] fbm_noise:seed19 ...
+    TIMEOUT  dist=0.5  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/fbm_noise_seed19.gif
+  Evaluating [left] fbm_noise:seed6 ...
+    TIMEOUT  dist=0.4  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/fbm_noise_seed06.gif
+  Evaluating [left] fbm_noise:seed17 ...
+    TIMEOUT  dist=0.6  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/fbm_noise_seed17.gif
+  Evaluating [left] random_walk:seed18 ...
+    TIMEOUT  dist=0.9  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/random_walk_seed18.gif
+  Evaluating [left] random_walk:seed11 ...
+    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/random_walk_seed11.gif
+  Evaluating [left] random_walk:seed3 ...
+    TIMEOUT  dist=0.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/random_walk_seed03.gif
+  Evaluating [left] spline:seed7 ...
+    TIMEOUT  dist=0.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/spline_seed07.gif
+  Evaluating [left] spline:seed1 ...
+    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/spline_seed01.gif
+  Evaluating [left] spline:seed2 ...
+    TIMEOUT  dist=1.4  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/spline_seed02.gif
+  Evaluating [left] wfc:seed17 ...
+    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/wfc_seed17.gif
+  Evaluating [left] wfc:seed5 ...
+    TIMEOUT  dist=0.0  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/wfc_seed05.gif
+  Evaluating [left] wfc:seed19 ...
+    TIMEOUT  dist=0.0  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/wfc_seed19.gif
+
+  [left] test results: 0/15 success  mean_dist=0.6
+
+=== Pipeline complete ===
+Total time: 1653s
