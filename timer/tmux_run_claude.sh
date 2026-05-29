@@ -45,12 +45,16 @@ done
 
 current_dir="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-echo "Launching Claude session: $SESSION_NAME"
-
-# Kill any existing session with this name before starting fresh
+# If session already exists, attach (or just report) — never kill a running session
 if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    tmux kill-session -t "$SESSION_NAME"
+    echo "Session already running: $SESSION_NAME"
+    if [ "$VIEW" -eq 1 ]; then
+        tmux attach-session -t "$SESSION_NAME"
+    fi
+    exit 0
 fi
+
+echo "Launching Claude session: $SESSION_NAME"
 
 tmux set-option -g history-limit 50000 2>/dev/null || true
 tmux set-option -g mouse on 2>/dev/null || true

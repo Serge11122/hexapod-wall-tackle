@@ -1,0 +1,330 @@
+"""
+Extended RobotPhysics for terrain traversal training.
+
+Key differences from robot_environment/contact_physics.py:
+  - No GrooveJoint: height control replaced by explicit adaptive spring force
+  - Terrain loaded from JSON (multi-segment polyline + bumpers)
+  - Foot contact detection via pymunk collision handlers
+  - Exposes sensory observation: joint angles, velocities, contact flags, forces
+  - Adaptive height target updated from EWMA of foot contact heights
+"""
+
+import math
+import pymunk
+import numpy as np
+
+from robot_motion.body import (
+    GRAVITY, BODY_HALF_H, BODY_HALF_LEN, LEG_L1, LEG_L2, LEG_MOUNTS,
+    BODY_MASS, LEG_SEGMENT_MASS, STATIC_FRICTION,
+)
+from robot_training.env.terrain_loader import (
+    load_terrain_into_space,
+    SELF_FILTER, COLL_TERRAIN, COLL_FOOT,
+    terrain_height_at,
+)
+
+# ── Control params ─────────────────────────────────────────────────────────────
+JOINT_KP        = 8.0
+JOINT_MAX_FORCE = 15.0
+PITCH_LIMIT     = 0.17    # ±10°
+LEVEL_MAX_FORCE = 20.0
+SUBSTEPS        = 40
+
+# ── Adaptive height controller ─────────────────────────────────────────────────
+HEIGHT_KP     = 60.0    # spring gain (N/m)
+HEIGHT_KD     = 20.0    # damping gain (N·s/m)
+WALK_HEIGHT   = 1.9     # nominal body COM above terrain
+HEIGHT_EWMA   = 0.92    # exponential moving average for terrain height estimate
+
+
+class TerrainRobotPhysics:
+    """
+    Pymunk robot in a terrain environment.
+
+    Sensory outputs accessible each step:
+      obs_joint_angles    : (8,) numpy array  — theta1,theta2 per leg
+      obs_joint_vels      : (8,) numpy array  — angular velocity per joint
+      obs_joint_torques   : (8,) numpy array  — signed motor force / max_force
+      obs_foot_contact    : (4,) bool array   — foot touching terrain?
+      obs_foot_forces     : (4,) float array  — normal contact force estimate
+      obs_foot_heights    : (4,) float array  — y of foot tip
+      body_state          : (x, y, theta, vx, vy, omega)
+    """
+
+    def __init__(self, dt: float, terrain_json: str, start_x: float, start_y: float):
+        self.dt           = dt
+        self.terrain_json = terrain_json
+        self._terrain_height_est = 0.0   # EWMA terrain height under robot
+
+        self.space = pymunk.Space()
+        self.space.gravity = (0.0, -GRAVITY)
+        self.space.damping = 0.88
+
+        self._terrain_meta = load_terrain_into_space(self.space, terrain_json)
+        self._terrain_segs = self._terrain_meta["segments"]
+
+        self._foot_contact  = [False] * 4
+        self._foot_forces   = [0.0]   * 4
+        self._contact_data  = {}   # leg_id → contact y
+
+        self._build_robot(start_x, start_y)
+        self._setup_collision_handlers()
+
+        # Sensory arrays (populated after each step)
+        self.obs_joint_angles  = np.zeros(8, dtype=np.float32)
+        self.obs_joint_vels    = np.zeros(8, dtype=np.float32)
+        self.obs_joint_torques = np.zeros(8, dtype=np.float32)
+        self.obs_foot_contact  = np.zeros(4, dtype=np.float32)
+        self.obs_foot_forces   = np.zeros(4, dtype=np.float32)
+        self.obs_foot_heights  = np.zeros(4, dtype=np.float32)
+
+    # ── Robot construction ────────────────────────────────────────────────────
+
+    def _build_robot(self, bx: float, by: float):
+        moment = pymunk.moment_for_box(BODY_MASS, (2 * BODY_HALF_LEN, 2 * BODY_HALF_H))
+        self.body = pymunk.Body(BODY_MASS, moment)
+        self.body.position = (bx, by)
+
+        body_shape           = pymunk.Poly.create_box(self.body, (2 * BODY_HALF_LEN, 2 * BODY_HALF_H))
+        body_shape.filter    = SELF_FILTER
+        body_shape.friction  = 0.0
+        body_shape.elasticity = 0.0
+        self.space.add(self.body, body_shape)
+
+        # Pitch clamp ±10°
+        pitch = pymunk.RotaryLimitJoint(
+            self.space.static_body, self.body, -PITCH_LIMIT, PITCH_LIMIT)
+        pitch.max_force = 1e6
+        self.space.add(pitch)
+
+        # Soft pitch damping
+        level = pymunk.SimpleMotor(self.space.static_body, self.body, 0.0)
+        level.max_force = LEVEL_MAX_FORCE
+        self.space.add(level)
+
+        self.legs = []
+        for m in LEG_MOUNTS:
+            self._build_leg(m["id"], m["local_x"], bx, by)
+
+        self._terrain_height_est = terrain_height_at(self._terrain_segs, bx)
+
+    def _build_leg(self, lid: int, mx: float, bx: float, by: float):
+        if lid in (1, 2):
+            t1, t2 = -0.987, -1.062
+        else:
+            t1, t2 = -0.896, -1.554
+
+        hip_x  = bx + mx
+        hip_y  = by
+        knee_x = hip_x  + LEG_L1 * math.cos(t1)
+        knee_y = hip_y  + LEG_L1 * math.sin(t1)
+        foot_x = knee_x + LEG_L2 * math.cos(t1 + t2)
+        foot_y = knee_y + LEG_L2 * math.sin(t1 + t2)
+
+        # Upper segment
+        ux = (hip_x + knee_x) / 2
+        uy = (hip_y + knee_y) / 2
+        upper = pymunk.Body(
+            LEG_SEGMENT_MASS,
+            pymunk.moment_for_segment(LEG_SEGMENT_MASS,
+                                      (-LEG_L1 / 2, 0), (LEG_L1 / 2, 0), 0.02))
+        upper.position = (ux, uy)
+        upper.angle    = t1
+
+        upper_sh = pymunk.Segment(upper, (-LEG_L1 / 2, 0), (LEG_L1 / 2, 0), 0.02)
+        upper_sh.filter    = SELF_FILTER
+        upper_sh.friction  = 0.0
+        upper_sh.elasticity = 0.0
+        self.space.add(upper, upper_sh)
+
+        hip_pin   = pymunk.PinJoint(self.body, upper, (mx, 0), (-LEG_L1 / 2, 0))
+        hip_motor = pymunk.SimpleMotor(upper, self.body, 0.0)
+        hip_motor.max_force = JOINT_MAX_FORCE
+        self.space.add(hip_pin, hip_motor)
+
+        # Lower segment (foot — has terrain friction)
+        lx = (knee_x + foot_x) / 2
+        ly = (knee_y + foot_y) / 2
+        lower = pymunk.Body(
+            LEG_SEGMENT_MASS,
+            pymunk.moment_for_segment(LEG_SEGMENT_MASS,
+                                      (-LEG_L2 / 2, 0), (LEG_L2 / 2, 0), 0.02))
+        lower.position = (lx, ly)
+        lower.angle    = t1 + t2
+
+        lower_sh = pymunk.Segment(lower, (-LEG_L2 / 2, 0), (LEG_L2 / 2, 0), 0.02)
+        lower_sh.filter         = SELF_FILTER  # group=1: no self-collision
+        lower_sh.collision_type = COLL_FOOT    # identified as foot for contact handler
+        lower_sh.friction       = STATIC_FRICTION
+        lower_sh.elasticity     = 0.02
+        self.space.add(lower, lower_sh)
+
+        knee_pin   = pymunk.PinJoint(upper, lower, (LEG_L1 / 2, 0), (-LEG_L2 / 2, 0))
+        knee_motor = pymunk.SimpleMotor(lower, upper, 0.0)
+        knee_motor.max_force = JOINT_MAX_FORCE
+        self.space.add(knee_pin, knee_motor)
+
+        self.legs.append({
+            "id":         lid,
+            "mount_x":    mx,
+            "upper":      upper,
+            "lower":      lower,
+            "hip_motor":  hip_motor,
+            "knee_motor": knee_motor,
+            "lower_sh":   lower_sh,
+        })
+
+    # ── Collision handlers ────────────────────────────────────────────────────
+
+    def _setup_collision_handlers(self):
+        # pymunk 7.x: space.on_collision(type_a, type_b, begin=..., separate=..., post_solve=...)
+        # data is passed as the `data` kwarg and received as third arg in callback.
+        self.space.on_collision(
+            collision_type_a = COLL_FOOT,
+            collision_type_b = COLL_TERRAIN,
+            begin      = _contact_begin,
+            separate   = _contact_separate,
+            post_solve = _contact_post_solve,
+            data       = self,
+        )
+
+    # ── Step ─────────────────────────────────────────────────────────────────
+
+    def step(self, joint_targets: np.ndarray) -> None:
+        """
+        Drive joints toward targets and step physics.
+
+        joint_targets: (8,) array — [hip0, knee0, hip1, knee1, hip2, knee2, hip3, knee3]
+        """
+        # Reset per-step contact accumulators
+        self._foot_forces = [0.0] * 4
+
+        body_angle = self.body.angle
+
+        for i, leg in enumerate(self.legs):
+            upper = leg["upper"]
+            lower = leg["lower"]
+            t1_t  = joint_targets[2 * i]
+            t2_t  = joint_targets[2 * i + 1]
+
+            t1_curr = upper.angle - body_angle
+            hip_err = (t1_t - t1_curr + math.pi) % (2 * math.pi) - math.pi
+            leg["hip_motor"].rate = JOINT_KP * hip_err
+
+            t2_curr = lower.angle - upper.angle
+            knee_err = (t2_t - t2_curr + math.pi) % (2 * math.pi) - math.pi
+            leg["knee_motor"].rate = JOINT_KP * knee_err
+
+        # Adaptive height controller ───────────────────────────────────────
+        # Update terrain height estimate from foot contacts
+        n_contact = sum(self._foot_contact)
+        if n_contact > 0:
+            contact_ys = [self._contact_data.get(leg["id"], self._terrain_height_est)
+                          for i, leg in enumerate(self.legs)
+                          if self._foot_contact[i]]
+            measured_h = sum(contact_ys) / len(contact_ys)
+            self._terrain_height_est = (HEIGHT_EWMA * self._terrain_height_est
+                                        + (1 - HEIGHT_EWMA) * measured_h)
+
+        target_y   = self._terrain_height_est + WALK_HEIGHT
+        bx, by     = self.body.position
+        vy         = self.body.velocity.y
+        spring_f   = HEIGHT_KP * (target_y - by) + HEIGHT_KD * (-vy)
+        self.body.apply_force_at_world_point((0.0, spring_f), (bx, by))
+
+        # Sub-step integration
+        sub_dt = self.dt / SUBSTEPS
+        for _ in range(SUBSTEPS):
+            self.space.step(sub_dt)
+
+        self._update_sensory()
+
+    def _update_sensory(self):
+        body_angle = self.body.angle
+        for i, leg in enumerate(self.legs):
+            upper = leg["upper"]
+            lower = leg["lower"]
+            self.obs_joint_angles[2 * i]     = upper.angle - body_angle
+            self.obs_joint_angles[2 * i + 1] = lower.angle - upper.angle
+            self.obs_joint_vels[2 * i]       = (upper.angular_velocity
+                                                 - self.body.angular_velocity)
+            self.obs_joint_vels[2 * i + 1]   = (lower.angular_velocity
+                                                 - upper.angular_velocity)
+            self.obs_joint_torques[2 * i]     = leg["hip_motor"].rate / max(abs(leg["hip_motor"].rate), 1.0)
+            self.obs_joint_torques[2 * i + 1] = leg["knee_motor"].rate / max(abs(leg["knee_motor"].rate), 1.0)
+            self.obs_foot_contact[i]           = float(self._foot_contact[i])
+            self.obs_foot_forces[i]            = float(self._foot_forces[i])
+            fw = lower.local_to_world((LEG_L2 / 2, 0))
+            self.obs_foot_heights[i]           = float(fw.y)
+
+    # ── State queries ─────────────────────────────────────────────────────────
+
+    def get_body_state(self) -> tuple:
+        p = self.body.position
+        v = self.body.velocity
+        return p.x, p.y, self.body.angle, v.x, v.y, self.body.angular_velocity
+
+    def get_render_pose(self) -> dict:
+        bx, by = self.body.position
+        bth    = self.body.angle
+        legs_out = []
+        for leg in self.legs:
+            upper = leg["upper"]
+            lower = leg["lower"]
+            fw = lower.local_to_world((LEG_L2 / 2, 0))
+            legs_out.append({
+                "id":         leg["id"],
+                "theta1":     upper.angle - bth,
+                "theta2":     lower.angle - upper.angle,
+                "foot_world": {"x": fw.x, "y": fw.y},
+            })
+        return {
+            "body":         {"x": bx, "y": by, "theta": bth},
+            "legs":         legs_out,
+            "planted_legs": [leg["id"] for i, leg in enumerate(self.legs)
+                             if self._foot_contact[i]],
+            "free_legs":    [leg["id"] for i, leg in enumerate(self.legs)
+                             if not self._foot_contact[i]],
+        }
+
+
+# ── Collision callbacks (module-level for pymunk 7.x) ────────────────────────
+# Signature: (arbiter, space, data) where data is the TerrainRobotPhysics instance.
+
+def _leg_idx_from_body(phys: "TerrainRobotPhysics", body: pymunk.Body) -> int:
+    for i, leg in enumerate(phys.legs):
+        if body is leg["lower"]:
+            return i
+    return -1
+
+
+def _contact_begin(arbiter: pymunk.Arbiter, space, phys) -> None:
+    # arbiter.shapes: (foot_shape, terrain_shape) or reversed
+    for sh in arbiter.shapes:
+        if sh.collision_type == COLL_FOOT:
+            idx = _leg_idx_from_body(phys, sh.body)
+            if idx >= 0:
+                phys._foot_contact[idx] = True
+                cps = arbiter.contact_point_set
+                if cps.points:
+                    cp = cps.points[0]
+                    cy = (cp.point_a.y + cp.point_b.y) / 2
+                    phys._contact_data[phys.legs[idx]["id"]] = cy
+
+
+def _contact_separate(arbiter: pymunk.Arbiter, space, phys) -> None:
+    for sh in arbiter.shapes:
+        if sh.collision_type == COLL_FOOT:
+            idx = _leg_idx_from_body(phys, sh.body)
+            if idx >= 0:
+                phys._foot_contact[idx] = False
+
+
+def _contact_post_solve(arbiter: pymunk.Arbiter, space, phys) -> None:
+    ti        = arbiter.total_impulse
+    force_mag = math.sqrt(ti.x ** 2 + ti.y ** 2)
+    for sh in arbiter.shapes:
+        if sh.collision_type == COLL_FOOT:
+            idx = _leg_idx_from_body(phys, sh.body)
+            if idx >= 0:
+                phys._foot_forces[idx] += force_mag
