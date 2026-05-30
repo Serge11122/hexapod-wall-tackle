@@ -26,9 +26,10 @@ import torch
 from robot_training.env.terrain_physics import TerrainRobotPhysics
 from robot_training.env.local_map import LocalMap, RESOLUTION
 from robot_training.env.terrain_env import (
-    ANGLE_NORM, VEL_CLIP, FORCE_NORM, HEIGHT_NORM,
+    ANGLE_NORM, VEL_CLIP, VEL_NORM, FORCE_NORM, HEIGHT_NORM,
     VX_NORM, VY_NORM, PITCH_NORM, PROGRESS_SCALE, FALL_Y, FALL_PITCH,
-    CONTACT_BONUS, FALL_PENALTY,
+    ALIVE_BONUS, FALL_PENALTY,
+    _HIP_KNEE_CENTER, _HIP_KNEE_SCALE, action_to_joints, joints_to_action,
 )
 from robot_training.models.policy import LSTMActorCritic
 
@@ -43,9 +44,10 @@ GAMMA         = 0.95 # discount factor for simulated rewards
 def _build_obs(phys: TerrainRobotPhysics, lmap: LocalMap, direction: int) -> np.ndarray:
     """Build observation vector matching terrain_env.py format."""
     bx, by, bth, vx, vy, omega = phys.get_body_state()
+    angles_norm = (phys.obs_joint_angles - _HIP_KNEE_CENTER) / _HIP_KNEE_SCALE
     base = np.concatenate([
-        phys.obs_joint_angles / ANGLE_NORM,
-        np.clip(phys.obs_joint_vels, -VEL_CLIP, VEL_CLIP) / VEL_CLIP,
+        angles_norm,
+        np.clip(phys.obs_joint_vels, -VEL_CLIP, VEL_CLIP) / VEL_NORM,
         phys.obs_joint_torques,
         phys.obs_foot_contact,
         np.clip(phys.obs_foot_forces, 0, FORCE_NORM) / FORCE_NORM,
@@ -65,15 +67,12 @@ def _step_reward(phys: TerrainRobotPhysics, prev_x: float, direction: int) -> tu
     """Compute reward after a physics step. Returns (reward, done, new_x)."""
     bx, by, bth, vx, vy, _ = phys.get_body_state()
     dx = (bx - prev_x) * direction
-    reward = dx * PROGRESS_SCALE
-
-    n_contacts = int(sum(phys._foot_contact))
-    reward += n_contacts * CONTACT_BONUS
+    reward = dx * PROGRESS_SCALE + ALIVE_BONUS
 
     terrain_h = phys._terrain_height_est
     done = (abs(bth) > FALL_PITCH) or (by < terrain_h + FALL_Y)
     if done:
-        reward += FALL_PENALTY  # -10
+        reward += FALL_PENALTY
 
     return reward, done, bx
 
@@ -207,7 +206,7 @@ class RolloutPlanner:
             with torch.no_grad():
                 _, _, _, self._lstm_state = self.policy.act(
                     obs_t, self._lstm_state, deterministic=True)
-            return np.clip(best_action, -1.0, 1.0) * math.pi
+            return action_to_joints(best_action)
 
         # ── Physics-based lookahead ───────────────────────────────────────────
         phys_state = _snapshot_physics(phys)
@@ -226,7 +225,7 @@ class RolloutPlanner:
 
                 total_reward  = 0.0
                 prev_x        = phys.body.position.x
-                joint_targets = np.clip(first_action_np, -1.0, 1.0) * math.pi
+                joint_targets = action_to_joints(first_action_np)
                 done          = False
 
                 for step_i in range(self.lookahead):
@@ -241,8 +240,8 @@ class RolloutPlanner:
                     next_obs_t = torch.from_numpy(next_obs).unsqueeze(0).to(self.device)
                     next_act, _, next_val, sim_lstm = self.policy.act(
                         next_obs_t, sim_lstm, deterministic=True)
-                    joint_targets = np.clip(
-                        next_act.squeeze(0).cpu().numpy(), -1.0, 1.0) * math.pi
+                    joint_targets = action_to_joints(
+                        next_act.squeeze(0).cpu().numpy())
 
                     if step_i == self.lookahead - 2 and not done:
                         total_reward += (GAMMA ** (step_i + 1)) * next_val.item()
@@ -260,4 +259,4 @@ class RolloutPlanner:
             _, _, _, self._lstm_state = self.policy.act(
                 obs_t, self._lstm_state, deterministic=True)
 
-        return np.clip(best_action, -1.0, 1.0) * math.pi
+        return action_to_joints(best_action)

@@ -4,7 +4,7 @@ TerrainTraversalEnv — gymnasium-compatible RL environment.
 Wraps TerrainRobotPhysics + LocalMap into a standard reset/step interface.
 
 Observation (OBS_DIM = 39 + 180 = 219):
-  [0:8]    joint angles (normalised)
+  [0:8]    joint angles (normalised to [-1,1] within anatomical range)
   [8:16]   joint angular velocities (clipped, normalised)
   [16:24]  joint torques (normalised)
   [24:28]  foot contact flags (binary)
@@ -15,7 +15,13 @@ Observation (OBS_DIM = 39 + 180 = 219):
   [39:219] 1D local map window (WINDOW_CELLS × 3)
 
 Action (ACT_DIM = 8):
-  target hip+knee angles for 4 legs, normalised to [-1, 1] → scaled to [-π, π]
+  action[0,2,4,6]: hip target in [-1,1]  → mapped to [HIP_MIN, HIP_MAX]  (body frame)
+  action[1,3,5,7]: knee target in [-1,1] → mapped to [KNEE_MIN, KNEE_MAX] (seg-relative)
+
+Joint constraints (enforced both by RotaryLimitJoint in physics and action clipping):
+  Hip:  -125° to +90°   (-2.182 to +1.571 rad) in body frame
+  Knee: -170° to  0°   (-2.967 to  0.000 rad) relative to upper segment
+  Max velocity: 8°/frame at 5fps = 40°/s = 0.698 rad/s
 
 All gait is entirely model-generated — no hardcoded animation sequences.
 """
@@ -25,54 +31,90 @@ import math
 
 import numpy as np
 
-from robot_training.env.terrain_physics import TerrainRobotPhysics, WALK_HEIGHT
+from robot_training.env.terrain_physics import (
+    TerrainRobotPhysics, WALK_HEIGHT,
+    HIP_MIN, HIP_MAX, KNEE_MIN, KNEE_MAX,
+)
 from robot_training.env.local_map import LocalMap, OBS_SIZE as MAP_OBS_SIZE
 from robot_training.dataset import TerrainEntry
 
 # ── Observation / action dims ──────────────────────────────────────────────────
-JOINT_DIM  = 8    # angles
-VEL_DIM    = 8    # joint vels
-TORQ_DIM   = 8    # torques
-CONT_DIM   = 4    # contact flags
-FORC_DIM   = 4    # contact forces
-FHGT_DIM   = 4    # foot heights
-BVEL_DIM   = 2    # body vx,vy
-PITCH_DIM  = 1    # body pitch
+JOINT_DIM  = 8
+VEL_DIM    = 8
+TORQ_DIM   = 8
+CONT_DIM   = 4
+FORC_DIM   = 4
+FHGT_DIM   = 4
+BVEL_DIM   = 2
+PITCH_DIM  = 1
 BASE_DIM   = (JOINT_DIM + VEL_DIM + TORQ_DIM + CONT_DIM
               + FORC_DIM + FHGT_DIM + BVEL_DIM + PITCH_DIM)  # 39
 OBS_DIM    = BASE_DIM + MAP_OBS_SIZE   # 39 + 180 = 219
 ACT_DIM    = 8
 
+# ── Action-space joint mapping ────────────────────────────────────────────────
+# action ∈ [-1, 1] maps linearly to anatomical joint angle ranges.
+# Hip  (indices 0,2,4,6): [-1,1] → [HIP_MIN, HIP_MAX]
+# Knee (indices 1,3,5,7): [-1,1] → [KNEE_MIN, KNEE_MAX]
+HIP_CENTER  = (HIP_MAX + HIP_MIN) / 2.0    # mid of hip range
+HIP_SCALE   = (HIP_MAX - HIP_MIN) / 2.0    # half-width of hip range
+KNEE_CENTER = (KNEE_MAX + KNEE_MIN) / 2.0  # mid of knee range
+KNEE_SCALE  = (KNEE_MAX - KNEE_MIN) / 2.0  # half-width of knee range
+
+# Pre-built broadcast arrays for fast vectorised action→joint conversion
+_HIP_KNEE_CENTER = np.array([HIP_CENTER, KNEE_CENTER] * 4, dtype=np.float32)
+_HIP_KNEE_SCALE  = np.array([HIP_SCALE,  KNEE_SCALE]  * 4, dtype=np.float32)
+
 # ── Normalisation constants ────────────────────────────────────────────────────
-ANGLE_NORM   = math.pi
-VEL_CLIP     = 10.0
+# Joint angle obs normalised by the half-range so result ≈ [-1, 1]
+HIP_NORM    = HIP_SCALE    # normalise hip obs by half-range
+KNEE_NORM   = KNEE_SCALE   # normalise knee obs by half-range
+# Pre-built broadcast array for vectorised obs normalisation
+_ANGLE_NORM = np.array([HIP_NORM, KNEE_NORM] * 4, dtype=np.float32)
+
+VEL_CLIP     = 5.0    # clip joint angular velocity at ±5 rad/s before normalising
+VEL_NORM     = 5.0    # normalise velocity by this value
 FORCE_NORM   = 50.0
 HEIGHT_NORM  = 3.0
-VX_NORM      = 3.0
-VY_NORM      = 3.0
-PITCH_NORM   = ANGLE_NORM
+VX_NORM      = 2.0
+VY_NORM      = 2.0
+PITCH_NORM   = math.pi / 4   # normalise pitch by ±45°
+
+# Keep ANGLE_NORM for planner compatibility
+ANGLE_NORM   = math.pi
 
 # ── Episode params ─────────────────────────────────────────────────────────────
-MAX_STEPS       = 500
-FALL_Y          = -0.5    # body COM below terrain_h + this → episode done (fell)
-FALL_PITCH      = 0.65    # body pitch beyond ±37° → episode done (tipped over)
-SUCCESS_DIST    = 25.0    # body moved this far → success
-DT              = 1.0 / 10  # 10 fps
+MAX_STEPS    = 600    # 120 seconds at 5fps — enough time for constrained walking
+FALL_Y       = -0.5   # body COM below terrain_h + this → episode done
+FALL_PITCH   = 0.65   # ±37° tilt → fall (realistic for uneven terrain)
+SUCCESS_DIST = 25.0
+DT           = 1.0 / 5  # 5 fps inference and rendering (matches 8°/frame velocity limit)
 
 # ── Reward shaping ─────────────────────────────────────────────────────────────
-PROGRESS_SCALE   = 10.0   # reward per metre forward progress (dominant signal)
-CONTACT_BONUS    = 0.04   # tiny contact bonus (incentivise grounding feet, not standing)
-FALL_PENALTY     = -10.0  # moderate fall penalty: walking-then-falling still better than standing
-SUCCESS_BONUS    = 100.0  # large success bonus
+PROGRESS_SCALE  = 10.0    # dominant reward: forward progress (must walk to earn reward)
+CONTACT_BONUS   = 0.0     # zero contact bonus — prevents standing-still exploitation
+ALIVE_BONUS     = 0.02    # tiny per-step alive bonus (walk > stand > fall)
+FALL_PENALTY    = -5.0    # fall penalty — not too harsh so robot explores walking
+SUCCESS_BONUS   = 100.0
 
-# Neutral joint angles (radians) for physics settling — model-derived, no gait file
-# Matches initial leg positions in terrain_physics._build_leg:
-#   legs 0,3 (front/rear outer): theta1=-0.896, theta2=-1.554
-#   legs 1,2 (front/rear inner): theta1=-0.987, theta2=-1.062
+# ── Neutral joint angles for gravity-settling ─────────────────────────────────
+# Natural standing pose: hips ~-65° (pointing diagonally down-forward),
+# knees ~-85° (bent moderately). Both within anatomical limits.
+# These are raw radians passed directly to TerrainRobotPhysics.step().
 NEUTRAL_ANGLES = np.array(
-    [-0.896, -1.554, -0.987, -1.062, -0.987, -1.062, -0.896, -1.554],
+    [-1.134, -1.484, -1.134, -1.484, -1.134, -1.484, -1.134, -1.484],
     dtype=np.float32,
-)
+)  # hip = -65°, knee = -85° → stable standing within constraints
+
+
+def action_to_joints(action: np.ndarray) -> np.ndarray:
+    """Convert normalised action [-1,1]^8 to joint target angles in radians."""
+    return _HIP_KNEE_CENTER + np.clip(action, -1.0, 1.0) * _HIP_KNEE_SCALE
+
+
+def joints_to_action(joint_targets: np.ndarray) -> np.ndarray:
+    """Convert raw joint angles (rad) back to normalised action [-1,1]."""
+    return np.clip((joint_targets - _HIP_KNEE_CENTER) / _HIP_KNEE_SCALE, -1.0, 1.0)
 
 
 class TerrainTraversalEnv:
@@ -137,10 +179,11 @@ class TerrainTraversalEnv:
     def step(self, action: np.ndarray) -> tuple:
         """
         Apply action, advance physics, return (obs, reward, done, info).
-        action: (ACT_DIM,) in [-1, 1] — scaled to joint angle ranges.
+        action: (ACT_DIM,) in [-1, 1]
+          hips  (indices 0,2,4,6): mapped to [HIP_MIN, HIP_MAX]
+          knees (indices 1,3,5,7): mapped to [KNEE_MIN, KNEE_MAX]
         """
-        # Scale action from [-1,1] to actual joint angle range
-        joint_targets = np.clip(action, -1.0, 1.0) * math.pi
+        joint_targets = action_to_joints(action)
 
         self._physics.step(joint_targets)
         self._step_count += 1
@@ -158,14 +201,13 @@ class TerrainTraversalEnv:
         bx, by, bth, vx, vy, omega = self._physics.get_body_state()
 
         # ── Reward components ─────────────────────────────────────────────────
-        # 1. Directional progress — dominant; stationary = 0, walking = positive
+        # Forward progress: the only major reward — robot must walk to earn it
         dx     = (bx - self._prev_x) * self.direction
         reward = dx * PROGRESS_SCALE
         self._prev_x = bx
 
-        # 2. Tiny contact bonus: encourage foot-ground contact while walking
-        n_contacts = int(sum(self._physics._foot_contact))
-        reward    += n_contacts * CONTACT_BONUS
+        # Tiny alive bonus: ensures surviving > falling (but standing ≪ walking)
+        reward += ALIVE_BONUS
 
         # ── Done conditions ───────────────────────────────────────────────────
         dist  = abs(bx - self._start_x)
@@ -195,9 +237,14 @@ class TerrainTraversalEnv:
         p = self._physics
         bx, by, bth, vx, vy, omega = p.get_body_state()
 
+        # Joint angles: normalised to [-1, 1] within anatomical range
+        # hip  obs ∈ [HIP_MIN, HIP_MAX]  → normalised by HIP_SCALE
+        # knee obs ∈ [KNEE_MIN, KNEE_MAX] → normalised by KNEE_SCALE
+        angles_norm = (p.obs_joint_angles - _HIP_KNEE_CENTER) / _HIP_KNEE_SCALE
+
         base = np.concatenate([
-            p.obs_joint_angles   / ANGLE_NORM,
-            np.clip(p.obs_joint_vels, -VEL_CLIP, VEL_CLIP) / VEL_CLIP,
+            angles_norm,
+            np.clip(p.obs_joint_vels, -VEL_CLIP, VEL_CLIP) / VEL_NORM,
             p.obs_joint_torques,
             p.obs_foot_contact,
             np.clip(p.obs_foot_forces, 0, FORCE_NORM) / FORCE_NORM,

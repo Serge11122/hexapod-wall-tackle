@@ -15,7 +15,7 @@ import numpy as np
 
 from robot_motion.body import (
     GRAVITY, BODY_HALF_H, BODY_HALF_LEN, LEG_L1, LEG_L2, LEG_MOUNTS,
-    BODY_MASS, LEG_SEGMENT_MASS, STATIC_FRICTION, TOTAL_MASS, FOOT_RADIUS,
+    BODY_MASS, LEG_SEGMENT_MASS, STATIC_FRICTION, TOTAL_MASS,
 )
 from robot_training.env.terrain_loader import (
     load_terrain_into_space,
@@ -24,25 +24,11 @@ from robot_training.env.terrain_loader import (
 )
 
 # ── Control params ─────────────────────────────────────────────────────────────
-# NOTE (physics correctness): the body is supported ENTIRELY by leg contact
-# forces against the terrain.  There is NO levitation/height spring and NO
-# world-anchored pitch constraint — both were non-physical "magic" forces that
-# made the robot float in the air regardless of whether its feet touched the
-# ground.  Body height and pitch now emerge purely from leg forces + gravity +
-# ground contact, exactly as a real legged robot.
-JOINT_KP        = 14.0    # proportional gain (joint-angle error → motor rate)
-JOINT_MAX_FORCE = 120.0   # max torque each joint motor can exert (N·m) — strong
-                          # enough for stance legs to carry the body weight
-SUBSTEPS        = 50      # physics sub-steps per env step for accuracy
-# Generous pitch limit (radians, ±34°).  Hard stop only — see _build_robot.
-# Set to None to remove entirely (body may then flip on rough terrain).
-PITCH_LIMIT     = 0.60
-
-# Spawn safety: drop the robot from a clear height and keep it away from walls
-# so it never starts intersecting terrain or boundary walls.
-SPAWN_DROP_HEIGHT = 2.6   # body COM height above terrain at spawn (legs tucked)
-SPAWN_WALL_MARGIN = 3.0   # min horizontal clearance from either boundary wall
-PENETRATION_TOL   = 0.20  # max allowed shape overlap (> pymunk collision slop 0.1)
+JOINT_KP        = 12.0   # proportional gain toward target joint angle
+JOINT_MAX_FORCE = 30.0   # max force each joint motor can exert (N)
+PITCH_LIMIT     = 0.25   # ±14° body pitch limit constraint
+LEVEL_MAX_FORCE = 30.0   # pitch damping motor max force
+SUBSTEPS        = 50     # physics sub-steps per env step for accuracy
 
 # ── Joint angle limits (biologically realistic) ───────────────────────────────
 # Reference: 0° = +x direction (body-right). All angles in radians.
@@ -58,11 +44,10 @@ KNEE_MIN = -170.0 * math.pi / 180.0  # -2.9671 rad  (almost fully folded)
 # actual position change (including inertia/integration effects) stays ≤ 8°/frame.
 MAX_JOINT_RATE = 35.0 * math.pi / 180.0  # 0.611 rad/s
 
-# ── Nominal walking height ────────────────────────────────────────────────────
-# Target body COM height above local terrain that the gait controller aims for.
-# This is a CONTROL set-point used to plan foot placement — it is NOT a force.
-# The body only reaches this height if the legs actually push it there.
-WALK_HEIGHT = 1.6     # body COM above terrain surface (metres)
+# ── Height controller (gravity-compensated spring) ────────────────────────────
+HEIGHT_KP   = 500.0   # N/m — stiffer spring for terrain-following
+HEIGHT_KD   = 80.0    # N·s/m — stronger damping
+WALK_HEIGHT = 1.9     # body COM above terrain surface (metres)
 
 
 class TerrainRobotPhysics:
@@ -91,36 +76,17 @@ class TerrainRobotPhysics:
 
         self.space = pymunk.Space()
         self.space.gravity = (0.0, -GRAVITY)
-        # Light global damping (internal joint/air friction) — NOT a stabiliser.
-        self.space.damping = 0.95
+        self.space.damping = 0.88
 
         self._terrain_meta = load_terrain_into_space(self.space, terrain_json)
         self._terrain_segs = self._terrain_meta["segments"]
-        self._env_left     = self._terrain_meta["env_left"]
-        self._env_right    = self._terrain_meta["env_right"]
-        # Terrain shapes for penetration checking.
-        self._terrain_shapes = [s for s in self.space.shapes
-                                if getattr(s, "collision_type", 0) == COLL_TERRAIN]
 
         self._foot_contact  = [False] * 4
         self._foot_forces   = [0.0]   * 4
         self._contact_data  = {}   # leg_id → contact y
-        self._robot_shapes  = []   # filled by _build_robot, for penetration checks
 
-        # ── Spawn safety: clear of walls, dropped from a safe height ──────────
-        sx = float(np.clip(start_x,
-                           self._env_left  + SPAWN_WALL_MARGIN,
-                           self._env_right - SPAWN_WALL_MARGIN))
-        # Drop above the HIGHEST terrain within the robot's footprint (legs span
-        # ~±2 units of body x) so tucked legs never spawn inside an obstacle.
-        local_max = max(terrain_height_at(self._terrain_segs, sx + dx)
-                        for dx in np.linspace(-2.2, 2.2, 15))
-        sy = max(start_y, local_max + SPAWN_DROP_HEIGHT)
-
-        self._build_robot(sx, sy)
+        self._build_robot(start_x, start_y)
         self._setup_collision_handlers()
-        # Robot is spawned in mid-air with tucked legs → must not intersect.
-        self.assert_no_penetration(context="spawn")
 
         self.obs_joint_angles  = np.zeros(8, dtype=np.float32)
         self.obs_joint_vels    = np.zeros(8, dtype=np.float32)
@@ -139,33 +105,30 @@ class TerrainRobotPhysics:
 
         body_shape           = pymunk.Poly.create_box(self.body, (2 * BODY_HALF_LEN, 2 * BODY_HALF_H))
         body_shape.filter    = SELF_FILTER
-        body_shape.friction  = 0.5
+        body_shape.friction  = 0.0
         body_shape.elasticity = 0.0
         self.space.add(self.body, body_shape)
-        self._robot_shapes.append(body_shape)
 
-        # 3-D lateral-stability proxy: a generous pitch LIMIT (hard stop only,
-        # NO torque motor and NO vertical force).  Within ±PITCH_LIMIT the body
-        # pitches freely as an emergent result of leg contact + gravity; the
-        # limit only prevents the body from rotating *past* the point where, in
-        # a real 3-D hexapod, the out-of-plane row of legs would catch it.  This
-        # is NOT the removed levitation/levelling magic: it carries no weight, so
-        # the body still falls if the legs fail to support it (no floating).
-        if PITCH_LIMIT is not None:
-            pitch = pymunk.RotaryLimitJoint(
-                self.space.static_body, self.body, -PITCH_LIMIT, PITCH_LIMIT)
-            pitch.max_force = 1e7
-            self.space.add(pitch)
+        # Pitch clamp ±10°
+        pitch = pymunk.RotaryLimitJoint(
+            self.space.static_body, self.body, -PITCH_LIMIT, PITCH_LIMIT)
+        pitch.max_force = 1e6
+        self.space.add(pitch)
+
+        # Soft pitch damping
+        level = pymunk.SimpleMotor(self.space.static_body, self.body, 0.0)
+        level.max_force = LEVEL_MAX_FORCE
+        self.space.add(level)
 
         self.legs = []
         for m in LEG_MOUNTS:
             self._build_leg(m["id"], m["local_x"], bx, by)
 
     def _build_leg(self, lid: int, mx: float, bx: float, by: float):
-        # Tucked-but-extended initial pose: feet hang below the body so that
-        # when the robot is dropped it lands on its feet (no splayed legs that
-        # could clip walls or terrain at spawn).
-        t1, t2 = -1.20, -1.30
+        if lid in (1, 2):
+            t1, t2 = -0.987, -1.062
+        else:
+            t1, t2 = -0.896, -1.554
 
         hip_x  = bx + mx
         hip_y  = by
@@ -186,10 +149,9 @@ class TerrainRobotPhysics:
 
         upper_sh = pymunk.Segment(upper, (-LEG_L1 / 2, 0), (LEG_L1 / 2, 0), 0.02)
         upper_sh.filter    = SELF_FILTER
-        upper_sh.friction  = 0.4
+        upper_sh.friction  = 0.0
         upper_sh.elasticity = 0.0
         self.space.add(upper, upper_sh)
-        self._robot_shapes.append(upper_sh)
 
         hip_pin   = pymunk.PinJoint(self.body, upper, (mx, 0), (-LEG_L1 / 2, 0))
         hip_motor = pymunk.SimpleMotor(upper, self.body, 0.0)
@@ -215,18 +177,6 @@ class TerrainRobotPhysics:
         lower_sh.friction       = STATIC_FRICTION
         lower_sh.elasticity     = 0.02
         self.space.add(lower, lower_sh)
-        self._robot_shapes.append(lower_sh)
-
-        # Rounded foot pad at the tip of the lower segment: gives a stable,
-        # high-friction contact patch (point feet on thin segments are unstable
-        # and prone to poking through terrain).
-        foot_sh = pymunk.Circle(lower, FOOT_RADIUS, (LEG_L2 / 2, 0))
-        foot_sh.filter         = SELF_FILTER
-        foot_sh.collision_type = COLL_FOOT
-        foot_sh.friction       = STATIC_FRICTION
-        foot_sh.elasticity     = 0.02
-        self.space.add(foot_sh)
-        self._robot_shapes.append(foot_sh)
 
         knee_pin   = pymunk.PinJoint(upper, lower, (LEG_L1 / 2, 0), (-LEG_L2 / 2, 0))
         knee_motor = pymunk.SimpleMotor(lower, upper, 0.0)
@@ -293,12 +243,21 @@ class TerrainRobotPhysics:
             knee_err = (t2_t_clamped - t2_curr + math.pi) % (2 * math.pi) - math.pi
             leg["knee_motor"].rate = max(-eff_rate, min(eff_rate, JOINT_KP * knee_err))
 
-        # No levitation force.  Track local terrain height for obs/control only.
-        bx, by = self.body.position
-        self._terrain_height_est = terrain_height_at(self._terrain_segs, bx)
+        # Gravity-compensated height controller ───────────────────────────
+        # Use ground-truth terrain height from JSON for stable control signal.
+        # At target height with zero velocity: spring_f = GRAVITY*TOTAL_MASS,
+        # exactly counteracting gravity so no equilibrium sag.
+        bx, by   = self.body.position
+        vy       = self.body.velocity.y
+        terrain_h = terrain_height_at(self._terrain_segs, bx)
+        self._terrain_height_est = terrain_h   # keep in sync for env/obs use
+        target_y  = terrain_h + WALK_HEIGHT
+        spring_f  = (HEIGHT_KP * (target_y - by)
+                     + HEIGHT_KD * (-vy)
+                     + GRAVITY * TOTAL_MASS)
+        self.body.apply_force_at_world_point((0.0, spring_f), (bx, by))
 
-        # Sub-step integration — gravity pulls the body down; only leg contact
-        # forces against the terrain can hold it up.
+        # Sub-step integration
         sub_dt = self.dt / SUBSTEPS
         for _ in range(SUBSTEPS):
             self.space.step(sub_dt)
@@ -352,45 +311,6 @@ class TerrainRobotPhysics:
             "free_legs":    [leg["id"] for i, leg in enumerate(self.legs)
                              if not self._foot_contact[i]],
         }
-
-    # ── Penetration / intersection detection ───────────────────────────────────
-
-    def worst_penetration(self) -> tuple:
-        """
-        Return (depth, robot_shape, terrain_shape) for the deepest overlap
-        between any robot shape and any terrain/wall shape.
-
-        depth is the signed separation of the closest contact: >= 0 means no
-        penetration; a negative value is the penetration depth (how far the
-        robot shape has intersected the terrain shape).  Returns depth = 0.0 if
-        nothing is in contact.
-        """
-        terrain_set = set(id(s) for s in self._terrain_shapes)
-        worst_depth = 0.0
-        worst_pair  = (None, None)
-        for rs in self._robot_shapes:
-            for info in self.space.shape_query(rs):
-                if id(info.shape) not in terrain_set:
-                    continue   # ignore non-terrain overlaps
-                for p in info.contact_point_set.points:
-                    if p.distance < worst_depth:
-                        worst_depth = p.distance
-                        worst_pair  = (rs, info.shape)
-        return worst_depth, worst_pair[0], worst_pair[1]
-
-    def assert_no_penetration(self, context: str = "", tol: float = PENETRATION_TOL) -> None:
-        """
-        Raise AssertionError if any robot shape intersects terrain/walls beyond
-        the physics solver's normal contact slop.  Catches the non-physical
-        states the user flagged: legs/body passing through walls or floor.
-        """
-        depth, rs, ts = self.worst_penetration()
-        assert depth > -tol, (
-            f"Robot intersects environment ({context}): penetration depth "
-            f"{-depth:.3f} > tol {tol:.3f}.  robot_shape={type(rs).__name__} "
-            f"terrain_shape={type(ts).__name__} at body pos "
-            f"{tuple(round(c, 2) for c in self.body.position)}"
-        )
 
 
 # ── Collision callbacks (module-level for pymunk 7.x) ────────────────────────

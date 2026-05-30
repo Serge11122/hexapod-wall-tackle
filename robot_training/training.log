@@ -2,110 +2,206 @@ Device: cuda
 
 Dataset: total=100  train=70  val=15  test=15
 
-[PPO] Training [right] — random init, model-generated gait only
+[PPO] Training [right] — velocity curriculum + joint constraints
   PPO [right]: LSTM + fixed-std — mean forced to learn walking
-  [right] Good training terrains: 61/70
+  [right] Good training terrains: 51/70
 
 ============================================================
 PPO-LSTM training [right]  iters=2000  device=cuda
 ============================================================
-  iter   10/2000 | dist=  9.3  rew= 139.0  succ=0.25 | L_pol=-0.0015  L_val=110.0325  log_std=0.487  t=36s
-  iter   20/2000 | dist= 11.1  rew= 137.1  succ=0.20 | L_pol=-0.0004  L_val=356.4221  log_std=0.474  t=70s
-  → VAL dist=15.09
+  iter   10/2000 | dist= 14.6  rew= 178.8  succ=0.25 | L_pol=-0.0013  L_val=395.6271  log_std=0.487  vel×20.0  t=45s
+  iter   20/2000 | dist=  0.8  rew=  19.6  succ=0.00 | L_pol=-0.0028  L_val=6.9325  log_std=0.474  vel×20.0  t=88s
+  → VAL dist=0.68
   ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
-  iter   30/2000 | dist= 10.1  rew= 130.2  succ=0.20 | L_pol=-0.0009  L_val=201.8041  log_std=0.461  t=111s
-  iter   40/2000 | dist=  9.3  rew= 130.8  succ=0.25 | L_pol=-0.0022  L_val=239.8632  log_std=0.448  t=146s
-  iter   50/2000 | dist= 12.0  rew= 128.5  succ=0.00 | L_pol=-0.0033  L_val=170.6188  log_std=0.434  t=180s
-  → VAL dist=17.74
+  iter   30/2000 | dist=  7.4  rew=  85.9  succ=0.00 | L_pol=-0.0037  L_val=210.2121  log_std=0.461  vel×20.0  t=144s
+  iter   40/2000 | dist=  9.1  rew=  93.1  succ=0.00 | L_pol=-0.0023  L_val=168.4583  log_std=0.448  vel×20.0  t=186s
+  iter   50/2000 | dist= 16.0  rew= 165.6  succ=0.00 | L_pol=-0.0012  L_val=338.7664  log_std=0.434  vel×20.0  t=229s
+  → VAL dist=0.65
+  iter   60/2000 | dist= 12.5  rew= 130.6  succ=0.00 | L_pol=-0.0048  L_val=132.3368  log_std=0.421  vel×20.0  t=285s
+  iter   70/2000 | dist= 13.9  rew= 184.0  succ=0.33 | L_pol=-0.0029  L_val=245.0995  log_std=0.408  vel×20.0  t=329s
+  → VAL dist=0.40
+  iter   80/2000 | dist= 15.8  rew= 216.2  succ=0.50 | L_pol=0.0065  L_val=405.7903  log_std=0.395  vel×20.0  t=384s
+  iter   90/2000 | dist= 17.4  rew= 231.5  succ=0.50 | L_pol=0.0003  L_val=312.7364  log_std=0.382  vel×20.0  t=429s
+  iter  100/2000 | dist= 15.0  rew= 155.1  succ=0.00 | L_pol=-0.0006  L_val=237.7514  log_std=0.369  vel×20.0  t=473s
+  → VAL dist=0.51
+  iter  110/2000 | dist= 10.7  rew= 129.4  succ=0.20 | L_pol=-0.0033  L_val=218.8613  log_std=0.356  vel×20.0  t=527s
+  iter  120/2000 | dist=  8.8  rew=  97.0  succ=0.00 | L_pol=-0.0005  L_val=127.8296  log_std=0.343  vel×20.0  t=571s
+  → VAL dist=0.60
+  iter  130/2000 | dist=  6.5  rew=  69.7  succ=0.00 | L_pol=0.0012  L_val=239.2597  log_std=0.330  vel×20.0  t=623s
+  iter  140/2000 | dist=  6.6  rew=  74.1  succ=0.00 | L_pol=-0.0038  L_val=72.0690  log_std=0.317  vel×20.0  t=670s
+  iter  150/2000 | dist= 20.4  rew= 270.9  succ=0.60 | L_pol=0.0085  L_val=475.9226  log_std=0.303  vel×20.0  t=712s
+  → VAL dist=0.49
+  iter  160/2000 | dist= 13.6  rew= 168.0  succ=0.25 | L_pol=-0.0030  L_val=294.9488  log_std=0.290  vel×20.0  t=769s
+  iter  170/2000 | dist= 16.0  rew= 183.8  succ=0.20 | L_pol=-0.0037  L_val=379.2793  log_std=0.277  vel×20.0  t=814s
+  → VAL dist=0.37
+  iter  180/2000 | dist= 13.0  rew= 139.6  succ=0.00 | L_pol=-0.0044  L_val=196.5880  log_std=0.264  vel×20.0  t=867s
+  iter  190/2000 | dist=  6.0  rew=  69.6  succ=0.00 | L_pol=-0.0041  L_val=126.5836  log_std=0.251  vel×20.0  t=910s
+  iter  200/2000 | dist=  6.4  rew=  74.0  succ=0.00 | L_pol=0.0030  L_val=280.5909  log_std=0.238  vel×20.0  t=953s
+  → VAL dist=0.47
+  iter  210/2000 | dist=  0.4  rew=  13.6  succ=0.00 | L_pol=-0.0086  L_val=4.9167  log_std=0.225  vel×20.0  t=1008s
+  iter  220/2000 | dist=  7.7  rew=  89.2  succ=0.00 | L_pol=-0.0033  L_val=155.1981  log_std=0.212  vel×20.0  t=1050s
+  → VAL dist=0.36
+  iter  230/2000 | dist= 16.8  rew= 227.0  succ=0.50 | L_pol=0.0011  L_val=366.0403  log_std=0.199  vel×20.0  t=1104s
+  iter  240/2000 | dist= 11.1  rew= 114.3  succ=0.00 | L_pol=-0.0026  L_val=162.0492  log_std=0.186  vel×20.0  t=1146s
+  iter  250/2000 | dist= 17.0  rew= 194.6  succ=0.20 | L_pol=0.0014  L_val=261.6264  log_std=0.172  vel×20.0  t=1189s
+  → VAL dist=0.34
+  iter  260/2000 | dist= 14.8  rew= 182.7  succ=0.25 | L_pol=-0.0031  L_val=363.2574  log_std=0.159  vel×20.0  t=1243s
+  iter  270/2000 | dist=  2.2  rew=  24.2  succ=0.00 | L_pol=-0.0036  L_val=161.1205  log_std=0.146  vel×20.0  t=1284s
+  → VAL dist=0.47
+  iter  280/2000 | dist=  1.6  rew=  19.1  succ=0.00 | L_pol=-0.0029  L_val=123.2992  log_std=0.133  vel×20.0  t=1339s
+  iter  290/2000 | dist= 16.9  rew= 200.2  succ=0.25 | L_pol=-0.0008  L_val=219.2790  log_std=0.120  vel×20.0  t=1381s
+  iter  300/2000 | dist= 11.7  rew= 150.3  succ=0.25 | L_pol=-0.0007  L_val=189.4705  log_std=0.107  vel×20.0  t=1424s
+  → VAL dist=0.45
+  iter  310/2000 | dist= 14.8  rew= 171.3  succ=0.20 | L_pol=-0.0018  L_val=362.5873  log_std=0.094  vel×20.0  t=1477s
+  iter  320/2000 | dist= 10.4  rew= 111.7  succ=0.00 | L_pol=-0.0023  L_val=139.9905  log_std=0.081  vel×20.0  t=1520s
+  → VAL dist=0.38
+  iter  330/2000 | dist=  7.2  rew=  83.6  succ=0.00 | L_pol=-0.0020  L_val=107.5459  log_std=0.068  vel×20.0  t=1586s
+  iter  340/2000 | dist= 13.7  rew= 142.0  succ=0.00 | L_pol=-0.0009  L_val=221.2571  log_std=0.055  vel×20.0  t=1637s
+  iter  350/2000 | dist= 12.3  rew= 164.7  succ=0.33 | L_pol=-0.0013  L_val=281.5249  log_std=0.041  vel×20.0  t=1688s
+  → VAL dist=0.49
+  iter  360/2000 | dist= 10.3  rew= 108.0  succ=0.00 | L_pol=-0.0037  L_val=241.0367  log_std=0.028  vel×20.0  t=1754s
+  iter  370/2000 | dist= 10.4  rew= 137.1  succ=0.25 | L_pol=-0.0015  L_val=304.7655  log_std=0.015  vel×20.0  t=1805s
+  → VAL dist=0.73
   ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
-  iter   60/2000 | dist= 14.6  rew= 173.7  succ=0.20 | L_pol=-0.0032  L_val=285.7262  log_std=0.421  t=219s
-  iter   70/2000 | dist=  5.5  rew=  64.7  succ=0.00 | L_pol=-0.0028  L_val=87.1728  log_std=0.408  t=255s
-  → VAL dist=12.53
-  iter   80/2000 | dist= 14.0  rew= 190.3  succ=0.40 | L_pol=-0.0025  L_val=356.8330  log_std=0.395  t=295s
-  iter   90/2000 | dist= 12.4  rew= 121.9  succ=0.00 | L_pol=-0.0050  L_val=212.8857  log_std=0.382  t=329s
-  iter  100/2000 | dist= 11.0  rew= 152.4  succ=0.25 | L_pol=-0.0057  L_val=216.6747  log_std=0.369  t=362s
-  → VAL dist=17.65
-  iter  110/2000 | dist=  5.7  rew=  78.9  succ=0.00 | L_pol=-0.0045  L_val=92.9277  log_std=0.356  t=403s
-  iter  120/2000 | dist= 17.5  rew= 196.8  succ=0.20 | L_pol=-0.0042  L_val=334.4661  log_std=0.343  t=440s
-  → VAL dist=14.36
-  iter  130/2000 | dist=  6.8  rew=  83.3  succ=0.00 | L_pol=-0.0075  L_val=82.4879  log_std=0.330  t=483s
-  iter  140/2000 | dist= 11.7  rew= 174.8  succ=0.40 | L_pol=-0.0054  L_val=243.1232  log_std=0.317  t=519s
-  iter  150/2000 | dist= 12.1  rew= 127.8  succ=0.00 | L_pol=-0.0041  L_val=280.1765  log_std=0.303  t=555s
-  → VAL dist=6.61
-  iter  160/2000 | dist= 12.2  rew= 161.6  succ=0.25 | L_pol=-0.0053  L_val=177.8126  log_std=0.290  t=597s
-  iter  170/2000 | dist= 17.4  rew= 235.2  succ=0.50 | L_pol=-0.0028  L_val=377.5107  log_std=0.277  t=633s
-  → VAL dist=17.66
-  iter  180/2000 | dist=  9.9  rew= 135.5  succ=0.25 | L_pol=-0.0045  L_val=215.8684  log_std=0.264  t=673s
-  iter  190/2000 | dist=  9.8  rew= 126.1  succ=0.20 | L_pol=-0.0028  L_val=262.8454  log_std=0.251  t=710s
-  iter  200/2000 | dist= 17.6  rew= 246.2  succ=0.60 | L_pol=-0.0007  L_val=377.0335  log_std=0.238  t=745s
-  → VAL dist=15.29
-  iter  210/2000 | dist= 12.5  rew= 164.8  succ=0.25 | L_pol=-0.0043  L_val=207.7220  log_std=0.225  t=786s
-  iter  220/2000 | dist= 10.1  rew= 103.9  succ=0.00 | L_pol=-0.0031  L_val=189.6786  log_std=0.212  t=823s
-  → VAL dist=9.21
-  iter  230/2000 | dist=  8.6  rew= 122.3  succ=0.25 | L_pol=-0.0050  L_val=131.2173  log_std=0.199  t=863s
-  iter  240/2000 | dist= 13.5  rew= 173.0  succ=0.25 | L_pol=-0.0028  L_val=174.7215  log_std=0.186  t=897s
-  iter  250/2000 | dist= 16.6  rew= 199.9  succ=0.25 | L_pol=-0.0028  L_val=296.8098  log_std=0.172  t=932s
-  → VAL dist=10.89
-  iter  260/2000 | dist= 13.4  rew= 197.0  succ=0.50 | L_pol=-0.0012  L_val=242.8261  log_std=0.159  t=972s
-  iter  270/2000 | dist= 14.0  rew= 160.1  succ=0.17 | L_pol=-0.0042  L_val=289.9116  log_std=0.146  t=1007s
-  → VAL dist=17.55
-  iter  280/2000 | dist=  4.5  rew=  60.2  succ=0.00 | L_pol=-0.0019  L_val=98.4105  log_std=0.133  t=1048s
-  iter  290/2000 | dist=  7.1  rew=  85.9  succ=0.00 | L_pol=-0.0072  L_val=120.9679  log_std=0.120  t=1082s
-  iter  300/2000 | dist=  8.0  rew= 116.2  succ=0.25 | L_pol=-0.0022  L_val=148.7563  log_std=0.107  t=1117s
-  → VAL dist=8.77
-  iter  310/2000 | dist=  3.4  rew=  42.6  succ=0.00 | L_pol=-0.0053  L_val=56.7260  log_std=0.094  t=1158s
-  iter  320/2000 | dist= 11.8  rew= 139.0  succ=0.17 | L_pol=-0.0020  L_val=342.9105  log_std=0.081  t=1192s
-  → VAL dist=11.27
-  iter  330/2000 | dist=  9.4  rew= 123.7  succ=0.20 | L_pol=-0.0050  L_val=195.2497  log_std=0.068  t=1232s
-  iter  340/2000 | dist=  7.5  rew= 110.2  succ=0.25 | L_pol=-0.0036  L_val=204.3733  log_std=0.055  t=1265s
-  iter  350/2000 | dist=  8.7  rew= 110.4  succ=0.17 | L_pol=-0.0055  L_val=235.9274  log_std=0.041  t=1301s
-  → VAL dist=17.57
-  iter  360/2000 | dist= 13.0  rew= 195.5  succ=0.50 | L_pol=-0.0037  L_val=249.2495  log_std=0.028  t=1339s
-  iter  370/2000 | dist=  5.6  rew=  62.2  succ=0.00 | L_pol=0.0003  L_val=278.6956  log_std=0.015  t=1372s
-  → VAL dist=9.97
-  iter  380/2000 | dist=  4.3  rew=  53.8  succ=0.00 | L_pol=0.0020  L_val=208.2366  log_std=0.002  t=1411s
-  iter  390/2000 | dist=  9.7  rew= 131.1  succ=0.20 | L_pol=-0.0022  L_val=223.9665  log_std=-0.011  t=1447s
-  iter  400/2000 | dist=  7.4  rew=  79.4  succ=0.00 | L_pol=-0.0003  L_val=146.6693  log_std=-0.024  t=1481s
-  → VAL dist=14.88
-  iter  410/2000 | dist=  9.3  rew= 127.3  succ=0.25 | L_pol=-0.0030  L_val=172.5494  log_std=-0.037  t=1521s
-  iter  420/2000 | dist=  8.6  rew=  90.8  succ=0.00 | L_pol=-0.0015  L_val=165.9250  log_std=-0.050  t=1556s
-  → VAL dist=9.48
-  iter  430/2000 | dist=  8.8  rew= 130.0  succ=0.25 | L_pol=-0.0008  L_val=211.4979  log_std=-0.063  t=1595s
-  iter  440/2000 | dist=  9.0  rew= 104.2  succ=0.00 | L_pol=0.0020  L_val=125.7571  log_std=-0.076  t=1631s
-  iter  450/2000 | dist= 12.4  rew= 158.1  succ=0.25 | L_pol=-0.0003  L_val=209.9937  log_std=-0.090  t=1681s
-  → VAL dist=14.66
-  iter  460/2000 | dist=  8.8  rew= 121.0  succ=0.25 | L_pol=-0.0062  L_val=178.2537  log_std=-0.103  t=1729s
-  iter  470/2000 | dist= 10.6  rew= 121.9  succ=0.00 | L_pol=-0.0002  L_val=153.5026  log_std=-0.116  t=1772s
-  → VAL dist=9.58
-  iter  480/2000 | dist= 17.9  rew= 241.8  succ=0.50 | L_pol=-0.0009  L_val=374.4341  log_std=-0.129  t=1819s
-  iter  490/2000 | dist=  8.7  rew=  99.5  succ=0.00 | L_pol=0.0008  L_val=211.3909  log_std=-0.142  t=1860s
-  iter  500/2000 | dist=  4.2  rew=  49.5  succ=0.00 | L_pol=0.0080  L_val=179.4614  log_std=-0.155  t=1900s
-  → VAL dist=11.43
-  iter  510/2000 | dist= 12.6  rew= 170.4  succ=0.40 | L_pol=-0.0060  L_val=312.4864  log_std=-0.168  t=1942s
-  iter  520/2000 | dist=  9.4  rew= 124.1  succ=0.20 | L_pol=-0.0030  L_val=246.0611  log_std=-0.181  t=1977s
-  → VAL dist=17.12
-  iter  530/2000 | dist= 14.2  rew= 180.5  succ=0.25 | L_pol=-0.0011  L_val=219.4037  log_std=-0.194  t=2015s
-  iter  540/2000 | dist= 13.1  rew= 171.6  succ=0.33 | L_pol=-0.0027  L_val=249.7822  log_std=-0.207  t=2051s
-  iter  550/2000 | dist= 21.4  rew= 301.9  succ=0.80 | L_pol=0.0003  L_val=493.8877  log_std=-0.221  t=2087s
-  → VAL dist=13.20
-  iter  560/2000 | dist= 10.4  rew= 111.0  succ=0.00 | L_pol=-0.0014  L_val=215.4016  log_std=-0.234  t=2127s
-  iter  570/2000 | dist= 12.0  rew= 130.8  succ=0.00 | L_pol=0.0000  L_val=282.3668  log_std=-0.247  t=2161s
-  → VAL dist=14.03
-  iter  580/2000 | dist= 14.7  rew= 156.6  succ=0.00 | L_pol=-0.0012  L_val=245.0189  log_std=-0.260  t=2199s
-  iter  590/2000 | dist=  7.6  rew=  96.9  succ=0.00 | L_pol=-0.0029  L_val=125.1149  log_std=-0.273  t=2234s
-  iter  600/2000 | dist= 15.9  rew= 192.0  succ=0.25 | L_pol=-0.0031  L_val=167.1845  log_std=-0.286  t=2268s
-  → VAL dist=4.74
-  iter  610/2000 | dist=  9.0  rew=  99.8  succ=0.00 | L_pol=-0.0031  L_val=164.6032  log_std=-0.299  t=2308s
-  iter  620/2000 | dist= 13.9  rew= 146.2  succ=0.00 | L_pol=-0.0013  L_val=150.7881  log_std=-0.312  t=2343s
-  → VAL dist=12.32
-  iter  630/2000 | dist= 11.0  rew= 108.8  succ=0.00 | L_pol=-0.0020  L_val=102.7488  log_std=-0.325  t=2386s
-  iter  640/2000 | dist= 14.7  rew= 182.5  succ=0.25 | L_pol=0.0019  L_val=245.8143  log_std=-0.338  t=2420s
-  iter  650/2000 | dist=  4.9  rew=  53.2  succ=0.00 | L_pol=-0.0029  L_val=128.5152  log_std=-0.352  t=2455s
-  → VAL dist=5.24
-  iter  660/2000 | dist=  2.8  rew=  42.9  succ=0.00 | L_pol=-0.0024  L_val=130.4048  log_std=-0.365  t=2500s
-  iter  670/2000 | dist=  8.2  rew=  90.2  succ=0.00 | L_pol=-0.0011  L_val=132.4782  log_std=-0.378  t=2537s
-  → VAL dist=11.80
-  iter  680/2000 | dist=  6.0  rew=  70.3  succ=0.00 | L_pol=-0.0019  L_val=109.6207  log_std=-0.391  t=2578s
-  iter  690/2000 | dist= 10.4  rew= 138.7  succ=0.25 | L_pol=0.0047  L_val=347.0471  log_std=-0.404  t=2612s
-  iter  700/2000 | dist= 14.3  rew= 176.9  succ=0.25 | L_pol=-0.0010  L_val=306.3837  log_std=-0.417  t=2648s
-  → VAL dist=11.21
+  iter  380/2000 | dist=  6.3  rew=  55.3  succ=0.00 | L_pol=-0.0030  L_val=105.5546  log_std=0.002  vel×20.0  t=1862s
+  iter  390/2000 | dist= 12.0  rew= 165.4  succ=0.33 | L_pol=-0.0020  L_val=214.0416  log_std=-0.011  vel×20.0  t=1903s
+  iter  400/2000 | dist= 10.6  rew= 111.8  succ=0.00 | L_pol=-0.0028  L_val=225.6718  log_std=-0.024  vel×20.0  t=1945s
+  → VAL dist=0.64
+  iter  410/2000 | dist= 18.3  rew= 239.6  succ=0.50 | L_pol=-0.0012  L_val=367.9188  log_std=-0.037  vel×20.0  t=2000s
+  iter  420/2000 | dist= 12.1  rew= 132.9  succ=0.00 | L_pol=-0.0009  L_val=232.3194  log_std=-0.050  vel×20.0  t=2043s
+  → VAL dist=0.33
+  iter  430/2000 | dist=  9.6  rew= 108.4  succ=0.00 | L_pol=-0.0016  L_val=164.6617  log_std=-0.063  vel×20.0  t=2097s
+  iter  440/2000 | dist= 15.2  rew= 157.4  succ=0.00 | L_pol=-0.0029  L_val=187.7922  log_std=-0.076  vel×20.0  t=2141s
+  iter  450/2000 | dist=  4.1  rew=  46.2  succ=0.00 | L_pol=-0.0053  L_val=104.5197  log_std=-0.090  vel×20.0  t=2183s
+  → VAL dist=0.42
+  iter  460/2000 | dist= 14.3  rew= 190.4  succ=0.40 | L_pol=-0.0015  L_val=228.0963  log_std=-0.103  vel×20.0  t=2237s
+  iter  470/2000 | dist= 15.8  rew= 202.6  succ=0.33 | L_pol=-0.0003  L_val=177.4341  log_std=-0.116  vel×20.0  t=2278s
+  → VAL dist=0.44
+  iter  480/2000 | dist=  9.7  rew=  97.4  succ=0.00 | L_pol=-0.0035  L_val=138.1581  log_std=-0.129  vel×20.0  t=2330s
+  iter  490/2000 | dist= 13.5  rew= 142.6  succ=0.00 | L_pol=-0.0037  L_val=213.5614  log_std=-0.142  vel×20.0  t=2376s
+  iter  500/2000 | dist=  9.4  rew= 122.7  succ=0.33 | L_pol=-0.0050  L_val=83.4192  log_std=-0.155  vel×20.0  t=2418s
+  → VAL dist=0.38
+  iter  510/2000 | dist=  6.5  rew=  71.4  succ=0.00 | L_pol=-0.0013  L_val=113.3477  log_std=-0.168  vel×19.8  t=2472s
+  iter  520/2000 | dist= 10.2  rew= 113.5  succ=0.00 | L_pol=-0.0024  L_val=116.8575  log_std=-0.181  vel×19.5  t=2516s
+  → VAL dist=0.54
+  iter  530/2000 | dist= 11.3  rew= 137.3  succ=0.20 | L_pol=-0.0036  L_val=178.1829  log_std=-0.194  vel×19.3  t=2571s
+  iter  540/2000 | dist=  6.9  rew= 103.9  succ=0.25 | L_pol=0.0013  L_val=189.2409  log_std=-0.207  vel×19.1  t=2614s
+  iter  550/2000 | dist= 10.6  rew= 114.0  succ=0.00 | L_pol=-0.0006  L_val=134.0603  log_std=-0.221  vel×18.8  t=2656s
+  → VAL dist=0.64
+  iter  560/2000 | dist=  9.8  rew= 138.0  succ=0.33 | L_pol=-0.0004  L_val=189.1982  log_std=-0.234  vel×18.6  t=2709s
+  iter  570/2000 | dist=  7.1  rew=  83.1  succ=0.00 | L_pol=-0.0014  L_val=110.0113  log_std=-0.247  vel×18.3  t=2751s
+  → VAL dist=0.39
+  iter  580/2000 | dist= 11.6  rew= 124.2  succ=0.00 | L_pol=-0.0012  L_val=132.8673  log_std=-0.260  vel×18.1  t=2808s
+  iter  590/2000 | dist= 12.2  rew= 130.0  succ=0.00 | L_pol=0.0015  L_val=164.2805  log_std=-0.273  vel×17.9  t=2851s
+  iter  600/2000 | dist=  7.1  rew=  81.0  succ=0.00 | L_pol=-0.0018  L_val=84.5347  log_std=-0.286  vel×17.6  t=2893s
+  → VAL dist=0.21
+  iter  610/2000 | dist=  8.0  rew=  91.6  succ=0.00 | L_pol=-0.0012  L_val=121.0250  log_std=-0.299  vel×17.4  t=2946s
+  iter  620/2000 | dist=  2.0  rew=  32.1  succ=0.00 | L_pol=-0.0021  L_val=27.8210  log_std=-0.312  vel×17.1  t=2990s
+  → VAL dist=0.46
+  iter  630/2000 | dist=  2.7  rew=  39.2  succ=0.00 | L_pol=0.0058  L_val=35.6258  log_std=-0.325  vel×16.9  t=3044s
+  iter  640/2000 | dist=  4.4  rew=  56.0  succ=0.00 | L_pol=0.0000  L_val=49.6603  log_std=-0.338  vel×16.7  t=3087s
+  iter  650/2000 | dist= 10.2  rew= 146.2  succ=0.33 | L_pol=0.0010  L_val=159.1217  log_std=-0.352  vel×16.4  t=3128s
+  → VAL dist=0.66
+  iter  660/2000 | dist=  7.9  rew=  90.9  succ=0.00 | L_pol=0.0006  L_val=92.2469  log_std=-0.365  vel×16.2  t=3182s
+  iter  670/2000 | dist=  3.4  rew=  46.0  succ=0.00 | L_pol=0.0004  L_val=67.1300  log_std=-0.378  vel×16.0  t=3224s
+  → VAL dist=0.35
+  iter  680/2000 | dist=  4.0  rew=  42.5  succ=0.00 | L_pol=0.0003  L_val=53.7462  log_std=-0.391  vel×15.7  t=3278s
+  iter  690/2000 | dist=  8.5  rew=  94.8  succ=0.00 | L_pol=-0.0024  L_val=89.9534  log_std=-0.404  vel×15.5  t=3321s
+  iter  700/2000 | dist=  6.9  rew=  80.9  succ=0.00 | L_pol=0.0014  L_val=102.3715  log_std=-0.417  vel×15.2  t=3361s
+  → VAL dist=0.62
+  iter  710/2000 | dist=  1.7  rew=  16.0  succ=0.00 | L_pol=-0.0017  L_val=29.5109  log_std=-0.430  vel×15.0  t=3414s
+  iter  720/2000 | dist=  8.3  rew=  91.7  succ=0.00 | L_pol=0.0102  L_val=98.0956  log_std=-0.443  vel×14.8  t=3457s
+  → VAL dist=0.48
+  iter  730/2000 | dist=  0.9  rew=   3.9  succ=0.00 | L_pol=-0.0007  L_val=28.1118  log_std=-0.456  vel×14.5  t=3511s
+  iter  740/2000 | dist=  5.0  rew=  61.5  succ=0.00 | L_pol=-0.0026  L_val=59.7131  log_std=-0.469  vel×14.3  t=3551s
+  iter  750/2000 | dist= 11.9  rew= 127.9  succ=0.00 | L_pol=0.0008  L_val=84.0858  log_std=-0.483  vel×14.1  t=3593s
+  → VAL dist=0.52
+  iter  760/2000 | dist=  1.9  rew=  27.7  succ=0.00 | L_pol=0.0004  L_val=33.4580  log_std=-0.496  vel×13.8  t=3646s
+  iter  770/2000 | dist=  8.5  rew=  96.7  succ=0.00 | L_pol=-0.0012  L_val=92.4103  log_std=-0.509  vel×13.6  t=3687s
+  → VAL dist=0.62
+  iter  780/2000 | dist=  3.0  rew=  40.6  succ=0.00 | L_pol=0.0011  L_val=62.2509  log_std=-0.522  vel×13.3  t=3740s
+  iter  790/2000 | dist=  0.6  rew=  16.3  succ=0.00 | L_pol=-0.0046  L_val=7.4521  log_std=-0.535  vel×13.1  t=3781s
+  iter  800/2000 | dist=  7.3  rew= 100.8  succ=0.25 | L_pol=-0.0033  L_val=156.0188  log_std=-0.548  vel×12.9  t=3823s
+  → VAL dist=0.36
+  iter  810/2000 | dist=  0.9  rew=  12.4  succ=0.00 | L_pol=-0.0002  L_val=18.9090  log_std=-0.561  vel×12.6  t=3893s
+  iter  820/2000 | dist=  3.1  rew=  39.8  succ=0.00 | L_pol=-0.0010  L_val=22.3862  log_std=-0.574  vel×12.4  t=3941s
+  → VAL dist=0.25
+  iter  830/2000 | dist=  0.7  rew=  16.4  succ=0.00 | L_pol=-0.0021  L_val=8.5828  log_std=-0.587  vel×12.2  t=4012s
+  iter  840/2000 | dist=  3.4  rew=  41.5  succ=0.00 | L_pol=0.0018  L_val=38.0771  log_std=-0.601  vel×11.9  t=4061s
+  iter  850/2000 | dist=  4.5  rew=  51.3  succ=0.00 | L_pol=-0.0002  L_val=84.5324  log_std=-0.614  vel×11.7  t=4109s
+  → VAL dist=0.37
+  iter  860/2000 | dist=  1.9  rew=  23.7  succ=0.00 | L_pol=-0.0016  L_val=12.1948  log_std=-0.627  vel×11.4  t=4181s
+  iter  870/2000 | dist=  2.9  rew=  40.8  succ=0.00 | L_pol=-0.0051  L_val=30.1243  log_std=-0.640  vel×11.2  t=4228s
+  → VAL dist=0.39
+  iter  880/2000 | dist=  0.7  rew=   5.0  succ=0.00 | L_pol=-0.0019  L_val=7.5421  log_std=-0.653  vel×11.0  t=4299s
+  iter  890/2000 | dist=  2.8  rew=  34.4  succ=0.00 | L_pol=0.0007  L_val=14.6284  log_std=-0.666  vel×10.7  t=4347s
+  iter  900/2000 | dist=  0.5  rew=  16.2  succ=0.00 | L_pol=-0.0073  L_val=5.0728  log_std=-0.679  vel×10.5  t=4396s
+  → VAL dist=0.40
+  iter  910/2000 | dist=  1.3  rew=  17.6  succ=0.00 | L_pol=-0.0024  L_val=16.6609  log_std=-0.692  vel×10.3  t=4466s
+  iter  920/2000 | dist=  0.9  rew=  19.7  succ=0.00 | L_pol=-0.0016  L_val=11.8805  log_std=-0.705  vel×10.0  t=4510s
+  → VAL dist=0.26
+  iter  930/2000 | dist=  1.4  rew=  22.2  succ=0.00 | L_pol=-0.0007  L_val=30.9430  log_std=-0.718  vel×9.8  t=4579s
+  iter  940/2000 | dist=  6.3  rew=  73.1  succ=0.00 | L_pol=-0.0033  L_val=35.1419  log_std=-0.732  vel×9.6  t=4624s
+  iter  950/2000 | dist=  1.1  rew=  23.1  succ=0.00 | L_pol=-0.0016  L_val=26.7581  log_std=-0.745  vel×9.3  t=4669s
+  → VAL dist=0.31
+  iter  960/2000 | dist=  5.4  rew=  66.3  succ=0.00 | L_pol=0.0007  L_val=61.2570  log_std=-0.758  vel×9.1  t=4739s
+  iter  970/2000 | dist=  1.6  rew=  28.2  succ=0.00 | L_pol=-0.0007  L_val=19.7467  log_std=-0.771  vel×8.8  t=4780s
+  → VAL dist=0.39
+  iter  980/2000 | dist=  0.4  rew=  11.5  succ=0.00 | L_pol=0.0024  L_val=27.7476  log_std=-0.784  vel×8.6  t=4847s
+  iter  990/2000 | dist=  1.1  rew=  23.1  succ=0.00 | L_pol=0.0007  L_val=4.1840  log_std=-0.797  vel×8.4  t=4888s
+  iter 1000/2000 | dist=  1.5  rew=  23.3  succ=0.00 | L_pol=0.0013  L_val=11.9271  log_std=-0.810  vel×8.1  t=4928s
+  → VAL dist=0.34
+  iter 1010/2000 | dist=  1.7  rew=  28.9  succ=0.00 | L_pol=0.0036  L_val=12.6204  log_std=-0.823  vel×7.9  t=4994s
+  iter 1020/2000 | dist=  0.1  rew=  11.5  succ=0.00 | L_pol=-0.0004  L_val=1.3852  log_std=-0.836  vel×7.7  t=5033s
+  → VAL dist=0.32
+  iter 1030/2000 | dist=  1.2  rew=  14.0  succ=0.00 | L_pol=0.0002  L_val=3.5710  log_std=-0.849  vel×7.4  t=5095s
+  iter 1040/2000 | dist=  0.5  rew=  11.0  succ=0.00 | L_pol=0.0001  L_val=2.3859  log_std=-0.863  vel×7.2  t=5135s
+  iter 1050/2000 | dist=  0.6  rew=  15.4  succ=0.00 | L_pol=0.0004  L_val=2.3042  log_std=-0.876  vel×6.9  t=5176s
+  → VAL dist=0.26
+  iter 1060/2000 | dist=  1.6  rew=  24.9  succ=0.00 | L_pol=0.0034  L_val=15.4365  log_std=-0.889  vel×6.7  t=5239s
+  iter 1070/2000 | dist=  1.6  rew=  25.0  succ=0.00 | L_pol=-0.0009  L_val=45.1528  log_std=-0.902  vel×6.5  t=5278s
+  → VAL dist=0.38
+  iter 1080/2000 | dist=  3.4  rew=  36.5  succ=0.00 | L_pol=0.0105  L_val=40.5962  log_std=-0.915  vel×6.2  t=5341s
+  iter 1090/2000 | dist=  1.3  rew=  23.8  succ=0.00 | L_pol=0.0048  L_val=20.8671  log_std=-0.928  vel×6.0  t=5381s
+  iter 1100/2000 | dist=  0.3  rew=  14.2  succ=0.00 | L_pol=-0.0008  L_val=1.2760  log_std=-0.941  vel×5.7  t=5422s
+  → VAL dist=0.35
+  iter 1110/2000 | dist=  1.0  rew=  22.4  succ=0.00 | L_pol=0.0061  L_val=16.6668  log_std=-0.954  vel×5.5  t=5483s
+  iter 1120/2000 | dist=  0.2  rew=  10.1  succ=0.00 | L_pol=0.0061  L_val=3.8985  log_std=-0.967  vel×5.3  t=5523s
+  → VAL dist=0.22
+  iter 1130/2000 | dist=  0.6  rew=  15.0  succ=0.00 | L_pol=0.0314  L_val=28.8365  log_std=-0.980  vel×5.0  t=5586s
+  iter 1140/2000 | dist=  2.0  rew=  32.0  succ=0.00 | L_pol=0.0066  L_val=6.4685  log_std=-0.994  vel×4.8  t=5626s
+  iter 1150/2000 | dist=  0.2  rew=  14.5  succ=0.00 | L_pol=0.0077  L_val=3.2009  log_std=-1.007  vel×4.6  t=5666s
+  → VAL dist=0.20
+  iter 1160/2000 | dist=  1.4  rew=  26.2  succ=0.00 | L_pol=-0.0004  L_val=2.8904  log_std=-1.020  vel×4.3  t=5730s
+  iter 1170/2000 | dist=  2.4  rew=  35.5  succ=0.00 | L_pol=-0.0002  L_val=9.5255  log_std=-1.033  vel×4.1  t=5771s
+  → VAL dist=0.29
+  iter 1180/2000 | dist=  0.2  rew=  12.4  succ=0.00 | L_pol=0.0009  L_val=0.8486  log_std=-1.046  vel×3.9  t=5837s
+  iter 1190/2000 | dist=  0.3  rew=  14.6  succ=0.00 | L_pol=0.0001  L_val=0.7153  log_std=-1.059  vel×3.6  t=5878s
+  iter 1200/2000 | dist=  1.1  rew=  22.5  succ=0.00 | L_pol=0.0125  L_val=10.4840  log_std=-1.072  vel×3.4  t=5919s
+  → VAL dist=0.30
+  iter 1210/2000 | dist=  0.2  rew=  10.1  succ=0.00 | L_pol=-0.0012  L_val=0.3379  log_std=-1.085  vel×3.1  t=5988s
+  iter 1220/2000 | dist=  0.4  rew=  14.0  succ=0.00 | L_pol=0.0204  L_val=8.1702  log_std=-1.098  vel×2.9  t=6037s
+  → VAL dist=0.30
+  iter 1230/2000 | dist=  4.6  rew=  55.6  succ=0.00 | L_pol=0.0281  L_val=21.4477  log_std=-1.111  vel×2.7  t=6106s
+  iter 1240/2000 | dist=  0.2  rew=  12.5  succ=0.00 | L_pol=-0.0039  L_val=0.3346  log_std=-1.125  vel×2.4  t=6150s
+  iter 1250/2000 | dist=  0.2  rew=  12.0  succ=0.00 | L_pol=-0.0025  L_val=0.5388  log_std=-1.138  vel×2.2  t=6191s
+  → VAL dist=0.27
+  iter 1260/2000 | dist=  0.6  rew=  18.0  succ=0.00 | L_pol=0.0003  L_val=1.8077  log_std=-1.151  vel×2.0  t=6259s
+  iter 1270/2000 | dist=  0.3  rew=  13.3  succ=0.00 | L_pol=0.0034  L_val=1.0610  log_std=-1.164  vel×1.7  t=6299s
+  → VAL dist=0.33
+  iter 1280/2000 | dist=  0.2  rew=  11.4  succ=0.00 | L_pol=-0.0041  L_val=0.1854  log_std=-1.177  vel×1.5  t=6364s
+  iter 1290/2000 | dist=  0.7  rew=  17.0  succ=0.00 | L_pol=-0.0023  L_val=0.5597  log_std=-1.190  vel×1.2  t=6411s
+  iter 1300/2000 | dist=  0.4  rew=  12.2  succ=0.00 | L_pol=-0.0041  L_val=0.1167  log_std=-1.203  vel×1.0  t=6455s
+  → VAL dist=0.56
+  iter 1310/2000 | dist=  1.3  rew=  19.6  succ=0.00 | L_pol=0.0077  L_val=1.4275  log_std=-1.216  vel×1.0  t=6531s
+  iter 1320/2000 | dist=  0.7  rew=  19.2  succ=0.00 | L_pol=-0.0024  L_val=0.6083  log_std=-1.229  vel×1.0  t=6575s
+  → VAL dist=0.34
+  iter 1330/2000 | dist=  0.7  rew=  16.9  succ=0.00 | L_pol=-0.0008  L_val=0.4393  log_std=-1.242  vel×1.0  t=6656s
+  iter 1340/2000 | dist=  0.6  rew=   6.3  succ=0.00 | L_pol=-0.0026  L_val=0.5086  log_std=-1.256  vel×1.0  t=6701s
+  iter 1350/2000 | dist=  0.4  rew=  15.6  succ=0.00 | L_pol=-0.0019  L_val=0.1848  log_std=-1.269  vel×1.0  t=6742s
+  → VAL dist=0.43
+  iter 1360/2000 | dist=  0.8  rew=  15.2  succ=0.00 | L_pol=0.0017  L_val=0.9868  log_std=-1.282  vel×1.0  t=6818s
+  iter 1370/2000 | dist=  0.4  rew=  12.8  succ=0.00 | L_pol=-0.0005  L_val=0.7590  log_std=-1.295  vel×1.0  t=6865s
+  → VAL dist=0.71
+  iter 1380/2000 | dist=  0.3  rew=  13.1  succ=0.00 | L_pol=0.0013  L_val=0.5932  log_std=-1.308  vel×1.0  t=6941s
+  iter 1390/2000 | dist=  0.7  rew=  18.6  succ=0.00 | L_pol=-0.0026  L_val=0.3445  log_std=-1.321  vel×1.0  t=6985s

@@ -129,12 +129,39 @@ class PPOTrainer:
 
     # ── Rollout collection ────────────────────────────────────────────────────
 
+    def _set_velocity_curriculum(self, phase: float) -> None:
+        """
+        Velocity curriculum: start with fast (unconstrained) joints so the robot
+        can discover walking, then gradually tighten to realistic 40°/s speed.
+
+          phase 0.00–0.25: 20× MAX_JOINT_RATE (essentially unlimited, find a gait)
+          phase 0.25–0.65: linear ramp 20× → 1× (slow down to realistic speed)
+          phase 0.65–1.00: 1× MAX_JOINT_RATE (full realistic constraint)
+        """
+        if self.env._physics is None:
+            return
+        # Capped velocity curriculum: a MODEST early speed boost (4×) for gait
+        # discovery, ramped to realistic 1× by mid-training.  A large boost
+        # (e.g. 20×) lets PPO exploit unphysical flailing that never transfers
+        # to realistic joint speed, so the cap is deliberately small.
+        VEL_MAX = 4.0
+        if phase < 0.20:
+            scale = VEL_MAX
+        elif phase < 0.50:
+            t = (phase - 0.20) / 0.30   # 0 → 1
+            scale = VEL_MAX * (1.0 - t) + 1.0 * t
+        else:
+            scale = 1.0
+        self.env._physics.velocity_limit_scale = scale
+
     def _collect_rollouts(self, phase: float) -> dict:
         self.buffer.reset()
         self.policy.eval()
 
         entry      = self._sample_terrain(phase)
         obs        = self.env.reset(entry)
+        # Apply velocity curriculum to current episode's physics
+        self._set_velocity_curriculum(phase)
         lstm_state = self.policy.init_hidden(1)   # reset hidden at episode start
 
         ep_lens, ep_rews, ep_dists = [], [], []
@@ -170,9 +197,10 @@ class PPOTrainer:
                         ep_succ += 1
                     ep_len, ep_rew = 0, 0.0
 
-                    # New episode: new terrain + reset LSTM hidden state
+                    # New episode: new terrain + reset LSTM + re-apply velocity curriculum
                     entry      = self._sample_terrain(phase)
                     obs        = self.env.reset(entry)
+                    self._set_velocity_curriculum(phase)
                     lstm_state = self.policy.init_hidden(1)
 
             # Bootstrap value at end of rollout
@@ -299,12 +327,13 @@ class PPOTrainer:
             loss_stats = self._ppo_update(phase)
 
             if it % LOG_INTERVAL == 0:
+                vel_scale = getattr(self.env._physics, 'velocity_limit_scale', 1.0) if self.env._physics else 1.0
                 print(f"  iter {it:4d}/{self.n_iters} | "
                       f"dist={ep_stats['ep_dist']:5.1f}  rew={ep_stats['ep_rew']:6.1f}  "
                       f"succ={ep_stats['success_rate']:.2f} | "
                       f"L_pol={loss_stats['loss_pol']:.4f}  "
                       f"L_val={loss_stats['loss_val']:.4f}  "
-                      f"log_std={loss_stats['log_std']:.3f}  "
+                      f"log_std={loss_stats['log_std']:.3f}  vel×{vel_scale:.1f}  "
                       f"t={time.time()-t0:.0f}s")
 
             if it % VAL_INTERVAL == 0:

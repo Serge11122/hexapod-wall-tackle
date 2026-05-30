@@ -14,7 +14,7 @@ import pymunk
 
 BUMPER_HEIGHT  = 0.6   # vertical wall at gap edges (robot detects these with feet)
 SEGMENT_RADIUS = 0.02
-TERRAIN_FRICTION    = 0.8
+TERRAIN_FRICTION    = 1.2
 TERRAIN_ELASTICITY  = 0.02
 WALL_FRICTION       = 0.0
 WALL_ELASTICITY     = 0.0

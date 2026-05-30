@@ -15,7 +15,7 @@ import numpy as np
 import torch
 from PIL import Image, ImageDraw
 
-from robot_training.env.terrain_env import TerrainTraversalEnv, DT
+from robot_training.env.terrain_env import TerrainTraversalEnv, DT, joints_to_action
 from robot_training.models.policy import load_policy
 from robot_training.planning.rollout_planner import RolloutPlanner
 from robot_training.dataset import TerrainEntry
@@ -106,8 +106,9 @@ def _evaluate_single(
         images.append(_render_frame(pose, terrain_meta, cx, cy, scale, lbl))
 
         # Physics-lookahead + value-guided action selection
+        # Planner returns joint angles in radians; convert back to [-1,1] for env.step
         joint_targets = planner.act(obs, env._physics, env._lmap, env.direction)
-        action_norm   = joint_targets / math.pi
+        action_norm   = joints_to_action(joint_targets)
         obs, _, done, info = env.step(action_norm)
         fi += 1
 

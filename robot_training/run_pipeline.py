@@ -47,12 +47,7 @@ def main():
     if not args.eval_only:
         from robot_training.ppo.trainer import PPOTrainer
         for direction, label in [(1, "right"), (-1, "left")]:
-            # Skip right model if best checkpoint already exists (already trained)
-            best_ckpt = MODEL_DIR / f"ppo_best_{label}.pt"
-            if direction > 0 and best_ckpt.exists():
-                print(f"\n[PPO] Right model already trained ({best_ckpt}), skipping")
-                continue
-            print(f"\n[PPO] Training [{label}] — model-generated gait only")
+            print(f"\n[PPO] Training [{label}] — velocity curriculum + joint constraints")
             trainer = PPOTrainer(
                 direction  = direction,
                 train_set  = train_set,

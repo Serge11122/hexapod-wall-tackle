@@ -25,7 +25,7 @@ fi
 ALIAS="$1"; shift
 SESSION_NAME="$ALIAS"
 # Defaults: model sonnet (Sonnet 4.6), effort medium, thinking disabled
-MODEL_FLAG="--model sonnet"
+MODEL_FLAG="--model opus"
 EFFORT_FLAG="--effort medium"
 VIEW=0
 # THINKING_ENV="export CLAUDE_CODE_DISABLE_THINKING=1"

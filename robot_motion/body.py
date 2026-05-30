@@ -29,7 +29,7 @@ GRAVITY           = 9.8     # m/s² downward
 
 # Contact / friction
 FOOT_RADIUS         = 0.05   # radius of spherical foot for friction area
-STATIC_FRICTION     = 0.8    # μs  foot–ground
+STATIC_FRICTION     = 1.2    # μs  foot–ground (boosted grip)
 DYNAMIC_FRICTION    = 0.6    # μk  foot–ground
 WALL_FRICTION       = 0.4    # μ   foot–wall
 RESTITUTION         = 0.05   # coefficient of restitution for collisions
