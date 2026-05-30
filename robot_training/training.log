@@ -1,267 +1,111 @@
 Device: cuda
 
-[0] Generating additional terrains ...
-  [primitive] seed=10: easy: gentle bumps  segs=69 gaps=0
-  [primitive] seed=11: staircase up+down  segs=23 gaps=0
-  [primitive] seed=12: small steppable gaps  segs=10 gaps=8
-  [primitive] seed=13: large fall-through gaps  segs=5 gaps=4
-  [primitive] seed=14: bumps + small gaps  segs=110 gaps=6
-  [primitive] seed=15: alternating extreme steps  segs=19 gaps=0
-  [primitive] seed=16: pit traps + bumps  segs=64 gaps=0
-  [primitive] seed=17: hard: random mix  segs=67 gaps=7
-  [primitive] seed=18: long flat + wall + large gap  segs=6 gaps=1
-  [primitive] seed=19: floating platforms at varied heights  segs=7 gaps=5
-  [fbm_noise] seed=10: smooth, no gaps  segs=599 gaps=0
-  [fbm_noise] seed=11: low freq + small gaps  segs=560 gaps=3
-  [fbm_noise] seed=12: medium freq + large gaps  segs=491 gaps=2
-  [fbm_noise] seed=13: high octaves + mixed gaps  segs=477 gaps=4
-  [fbm_noise] seed=14: gentle hills + massive gap  segs=534 gaps=1
-  [fbm_noise] seed=15: rough + many small gaps  segs=541 gaps=5
-  [fbm_noise] seed=16: high amplitude + 2 large + 1 small  segs=492 gaps=3
-  [fbm_noise] seed=17: moderate + alternating gaps  segs=464 gaps=6
-  [fbm_noise] seed=18: very low freq + huge gap  segs=517 gaps=2
-  [fbm_noise] seed=19: max difficulty: rough + gaps  segs=478 gaps=4
-  [random_walk] seed=10: very smooth walk, no gaps  segs=499 gaps=0
-  [random_walk] seed=11: gentle walk + small gaps  segs=471 gaps=3
-  [random_walk] seed=12: moderate walk + large gaps  segs=422 gaps=2
-  [random_walk] seed=13: rougher walk + mixed small  segs=451 gaps=4
-  [random_walk] seed=14: bumpy walk + 2 large gaps  segs=404 gaps=2
-  [random_walk] seed=15: jagged walk + 5 varied gaps  segs=355 gaps=5
-  [random_walk] seed=16: smooth walk + 6 small steppable  segs=440 gaps=6
-  [random_walk] seed=17: very jagged + 3 large gaps  segs=351 gaps=3
-  [random_walk] seed=18: medium jagged + borderline gaps  segs=429 gaps=4
-  [random_walk] seed=19: max jagged + max gaps  segs=310 gaps=4
-  [spline] seed=10: 6 ctrl pts, gentle waves  segs=499 gaps=0
-  [spline] seed=11: 8 pts + 2 small gaps  segs=477 gaps=2
-  [spline] seed=12: 10 pts + 2 large gaps  segs=409 gaps=2
-  [spline] seed=13: 7 pts + 3 small gaps  segs=469 gaps=3
-  [spline] seed=14: 12 pts + large + small  segs=399 gaps=3
-  [spline] seed=15: 5 pts + alternating gaps  segs=387 gaps=4
-  [spline] seed=16: 9 pts + 5 small steppable  segs=456 gaps=5
-  [spline] seed=17: 8 pts + two huge gaps  segs=386 gaps=2
-  [spline] seed=18: 14 pts + alternating sizes  segs=399 gaps=4
-  [spline] seed=19: 10 pts max difficulty  segs=371 gaps=5
-  [wfc] seed=10: easy: flat-heavy  segs=99 gaps=0
-  [wfc] seed=11: bumps + small gaps  segs=86 gaps=4
-  [wfc] seed=12: step-heavy  segs=54 gaps=4
-  [wfc] seed=13: large gap emphasis  segs=47 gaps=2
-  [wfc] seed=14: pit-heavy  segs=49 gaps=2
-  [wfc] seed=15: balanced medium  segs=52 gaps=0
-  [wfc] seed=16: ramps + bumps  segs=136 gaps=1
-  [wfc] seed=17: gap-heavy  segs=67 gaps=7
-  [wfc] seed=18: obstacles + pits  segs=39 gaps=1
-  [wfc] seed=19: full chaos  segs=68 gaps=4
-
 Dataset: total=100  train=70  val=15  test=15
 
-[1] BC data collection ...
-  Collecting BC data [right] (600 steps) ...
-    Saved obs=(600, 219)  act=(600, 8)
-  Collecting BC data [left] (600 steps) ...
-    Saved obs=(600, 219)  act=(600, 8)
-
-[2] BC training ...
-  BC training [right]: 600 samples, 60 epochs, device=cuda
-    epoch  10/60  loss=0.00462  t=0s
-    epoch  20/60  loss=0.00114  t=1s
-    epoch  30/60  loss=0.00049  t=1s
-    epoch  40/60  loss=0.00027  t=1s
-    epoch  50/60  loss=0.00017  t=1s
-    epoch  60/60  loss=0.00012  t=1s
-  BC model saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/bc_right.pt
-  BC training [left]: 600 samples, 60 epochs, device=cuda
-    epoch  10/60  loss=0.00685  t=0s
-    epoch  20/60  loss=0.00277  t=0s
-    epoch  30/60  loss=0.00087  t=0s
-    epoch  40/60  loss=0.00042  t=1s
-    epoch  50/60  loss=0.00026  t=1s
-    epoch  60/60  loss=0.00019  t=1s
-  BC model saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/bc_left.pt
-  PPO [right]: loading BC init from /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/bc_right.pt
+[PPO] Training [right] — random init, model-generated gait only
+  PPO [right]: LSTM + fixed-std — mean forced to learn walking
+  [right] Good training terrains: 61/70
 
 ============================================================
-PPO training [right]  iters=300  device=cuda
+PPO-LSTM training [right]  iters=2000  device=cuda
 ============================================================
-  iter   10/300 | dist=  3.4  rew=-954.9  succ=0.00 | L_pol=-0.0131  L_val=694.0869  t=17s
-  iter   20/300 | dist=  0.0  rew=-1090.0  succ=0.00 | L_pol=-0.0105  L_val=837.4470  t=31s
-  → VAL dist=0.24
+  iter   10/2000 | dist=  9.3  rew= 139.0  succ=0.25 | L_pol=-0.0015  L_val=110.0325  log_std=0.487  t=36s
+  iter   20/2000 | dist= 11.1  rew= 137.1  succ=0.20 | L_pol=-0.0004  L_val=356.4221  log_std=0.474  t=70s
+  → VAL dist=15.09
   ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
-  iter   30/300 | dist=  0.1  rew=-1363.0  succ=0.00 | L_pol=-0.0132  L_val=1239.5824  t=54s
-  iter   40/300 | dist=  0.2  rew=-1069.4  succ=0.00 | L_pol=-0.0088  L_val=609.6418  t=69s
-  → VAL dist=0.55
+  iter   30/2000 | dist= 10.1  rew= 130.2  succ=0.20 | L_pol=-0.0009  L_val=201.8041  log_std=0.461  t=111s
+  iter   40/2000 | dist=  9.3  rew= 130.8  succ=0.25 | L_pol=-0.0022  L_val=239.8632  log_std=0.448  t=146s
+  iter   50/2000 | dist= 12.0  rew= 128.5  succ=0.00 | L_pol=-0.0033  L_val=170.6188  log_std=0.434  t=180s
+  → VAL dist=17.74
   ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
-  iter   50/300 | dist=  0.7  rew=-1113.9  succ=0.00 | L_pol=-0.0066  L_val=605.5497  t=91s
-  iter   60/300 | dist=  3.5  rew=-539.7  succ=0.00 | L_pol=0.0022  L_val=862.5325  t=106s
-  → VAL dist=0.52
-  iter   70/300 | dist=  3.2  rew=-1124.9  succ=0.00 | L_pol=-0.0034  L_val=470.6719  t=129s
-  iter   80/300 | dist=  3.2  rew=-430.4  succ=0.00 | L_pol=-0.0254  L_val=487.1723  t=142s
-  → VAL dist=1.05
-  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
-  iter   90/300 | dist=  2.1  rew=-1468.6  succ=0.00 | L_pol=-0.0006  L_val=773.9353  t=161s
-  iter  100/300 | dist=  1.6  rew=-1168.4  succ=0.00 | L_pol=-0.0223  L_val=289.9323  t=174s
-  → VAL dist=0.76
-  iter  110/300 | dist=  6.8  rew=-1178.7  succ=0.00 | L_pol=-0.0363  L_val=472.8305  t=199s
-  iter  120/300 | dist=  1.2  rew=-1318.5  succ=0.00 | L_pol=-0.0007  L_val=656.1914  t=219s
-  → VAL dist=0.82
-  iter  130/300 | dist=  1.5  rew=-1319.0  succ=0.00 | L_pol=-0.0025  L_val=742.0676  t=242s
-  iter  140/300 | dist=  1.5  rew=-1604.8  succ=0.00 | L_pol=-0.0136  L_val=760.1774  t=260s
-  → VAL dist=0.61
-  iter  150/300 | dist=  6.8  rew=-1143.9  succ=0.00 | L_pol=-0.0109  L_val=529.1700  t=283s
-  iter  160/300 | dist=  1.7  rew=-1415.2  succ=0.00 | L_pol=-0.0016  L_val=727.3659  t=304s
-  → VAL dist=0.95
-  iter  170/300 | dist=  2.7  rew=-725.5  succ=0.00 | L_pol=-0.0182  L_val=1201.7881  t=326s
-  iter  180/300 | dist=  2.6  rew=-1381.0  succ=0.00 | L_pol=-0.0195  L_val=297.1497  t=343s
-  → VAL dist=1.67
-  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
-  iter  190/300 | dist=  3.2  rew=-1341.6  succ=0.00 | L_pol=-0.0014  L_val=748.4881  t=369s
-  iter  200/300 | dist=  1.0  rew=-1429.5  succ=0.00 | L_pol=-0.0200  L_val=311.7804  t=389s
-  → VAL dist=0.71
-  iter  210/300 | dist=  1.0  rew=-1310.0  succ=0.00 | L_pol=-0.0182  L_val=298.2314  t=416s
-  iter  220/300 | dist=  7.4  rew=-1232.4  succ=0.00 | L_pol=-0.0161  L_val=272.1109  t=432s
-  → VAL dist=0.64
-  iter  230/300 | dist=  5.8  rew=-1215.2  succ=0.00 | L_pol=-0.0099  L_val=505.9073  t=461s
-  iter  240/300 | dist=  0.8  rew=-1081.8  succ=0.00 | L_pol=-0.0021  L_val=543.0616  t=482s
-  → VAL dist=0.59
-  iter  250/300 | dist=  2.5  rew=-258.3  succ=0.00 | L_pol=-0.0101  L_val=399.6353  t=511s
-  iter  260/300 | dist=  2.3  rew=-1127.0  succ=0.00 | L_pol=-0.0068  L_val=732.2656  t=532s
-  → VAL dist=1.14
-  iter  270/300 | dist=  0.8  rew=-1430.2  succ=0.00 | L_pol=-0.0011  L_val=765.3561  t=557s
-  iter  280/300 | dist=  5.5  rew=-1194.1  succ=0.00 | L_pol=-0.0141  L_val=409.3292  t=575s
-  → VAL dist=0.67
-  iter  290/300 | dist=  3.5  rew=-1608.4  succ=0.00 | L_pol=-0.0024  L_val=945.4028  t=603s
-  iter  300/300 | dist=  5.3  rew=-1327.1  succ=0.00 | L_pol=-0.0163  L_val=467.2266  t=623s
-  → VAL dist=0.90
-
-Final model → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_final_right.pt
-Best val dist = 1.67
-  PPO [left]: loading BC init from /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/bc_left.pt
-
-============================================================
-PPO training [left]  iters=300  device=cuda
-============================================================
-  iter   10/300 | dist=  2.4  rew=-244.8  succ=0.00 | L_pol=-0.0095  L_val=581.7845  t=11s
-  iter   20/300 | dist=  0.6  rew=-499.1  succ=0.00 | L_pol=-0.0128  L_val=638.4072  t=26s
-  → VAL dist=0.33
-  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
-  iter   30/300 | dist=  4.4  rew=-507.3  succ=0.00 | L_pol=-0.0057  L_val=561.9422  t=44s
-  iter   40/300 | dist=  0.2  rew=-116.2  succ=0.00 | L_pol=-0.0207  L_val=427.6096  t=55s
-  → VAL dist=0.16
-  iter   50/300 | dist=  5.3  rew=-1094.4  succ=0.00 | L_pol=-0.0010  L_val=511.5591  t=72s
-  iter   60/300 | dist=  0.8  rew=-266.3  succ=0.00 | L_pol=-0.0022  L_val=383.7022  t=84s
-  → VAL dist=0.55
-  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
-  iter   70/300 | dist=  3.1  rew=-169.2  succ=0.00 | L_pol=-0.0356  L_val=641.7497  t=102s
-  iter   80/300 | dist=  1.4  rew=-308.2  succ=0.00 | L_pol=-0.0100  L_val=689.6441  t=114s
-  → VAL dist=0.32
-  iter   90/300 | dist=  7.6  rew=-617.7  succ=0.00 | L_pol=-0.0035  L_val=533.7329  t=130s
-  iter  100/300 | dist=  0.5  rew=-226.4  succ=0.00 | L_pol=-0.0036  L_val=522.5805  t=143s
-  → VAL dist=0.53
-  iter  110/300 | dist=  0.3  rew=-1529.0  succ=0.00 | L_pol=-0.0012  L_val=855.8920  t=169s
-  iter  120/300 | dist=  2.0  rew=-491.1  succ=0.00 | L_pol=-0.0248  L_val=1080.2673  t=188s
-  → VAL dist=0.79
-  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
-  iter  130/300 | dist=  0.9  rew=-671.3  succ=0.00 | L_pol=-0.0082  L_val=868.6709  t=210s
-  iter  140/300 | dist=  0.6  rew=-1418.2  succ=0.00 | L_pol=-0.0127  L_val=527.7424  t=231s
-  → VAL dist=0.57
-  iter  150/300 | dist=  7.4  rew=-1316.5  succ=0.00 | L_pol=-0.0118  L_val=367.7097  t=254s
-  iter  160/300 | dist=  0.2  rew=-1462.6  succ=0.00 | L_pol=-0.0122  L_val=818.8197  t=274s
-  → VAL dist=0.51
-  iter  170/300 | dist=  0.7  rew=-1625.4  succ=0.00 | L_pol=-0.0258  L_val=646.3549  t=298s
-  iter  180/300 | dist=  1.1  rew=-1619.3  succ=0.00 | L_pol=-0.0094  L_val=914.3225  t=315s
-  → VAL dist=0.79
-  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
-  iter  190/300 | dist=  6.0  rew=-1386.9  succ=0.00 | L_pol=-0.0106  L_val=639.5683  t=339s
-  iter  200/300 | dist=  3.2  rew=-1245.8  succ=0.00 | L_pol=-0.0063  L_val=692.3825  t=354s
-  → VAL dist=0.39
-  iter  210/300 | dist=  0.4  rew=-1218.4  succ=0.00 | L_pol=-0.0194  L_val=568.0464  t=380s
-  iter  220/300 | dist=  0.4  rew=-1497.7  succ=0.00 | L_pol=-0.0100  L_val=537.3050  t=397s
-  → VAL dist=0.68
-  iter  230/300 | dist=  1.5  rew=-1023.4  succ=0.00 | L_pol=-0.0047  L_val=879.8901  t=422s
-  iter  240/300 | dist=  1.3  rew=-1827.7  succ=0.00 | L_pol=-0.0026  L_val=1173.2872  t=439s
-  → VAL dist=0.46
-  iter  250/300 | dist=  1.0  rew=-1620.8  succ=0.00 | L_pol=0.0002  L_val=1045.6203  t=462s
-  iter  260/300 | dist=  1.0  rew=-1750.2  succ=0.00 | L_pol=0.0027  L_val=771.1802  t=483s
-  → VAL dist=0.81
-  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
-  iter  270/300 | dist=  0.6  rew=-1393.8  succ=0.00 | L_pol=0.0016  L_val=816.3394  t=506s
-  iter  280/300 | dist=  1.1  rew=-1345.8  succ=0.00 | L_pol=-0.0005  L_val=699.6469  t=527s
-  → VAL dist=0.58
-  iter  290/300 | dist=  0.9  rew=-1433.6  succ=0.00 | L_pol=-0.0094  L_val=556.1941  t=551s
-  iter  300/300 | dist=  0.1  rew=-966.0  succ=0.00 | L_pol=-0.0228  L_val=511.5514  t=572s
-  → VAL dist=0.62
-
-Final model → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_final_left.pt
-Best val dist = 0.81
-
-[4] Evaluating on test set ...
-
-  [right] model: /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
-  Evaluating [right] primitive:seed8 ...
-    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/primitive_seed08.gif
-  Evaluating [right] primitive:seed0 ...
-    TIMEOUT  dist=0.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/primitive_seed00.gif
-  Evaluating [right] primitive:seed3 ...
-    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/primitive_seed03.gif
-  Evaluating [right] fbm_noise:seed19 ...
-    TIMEOUT  dist=1.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/fbm_noise_seed19.gif
-  Evaluating [right] fbm_noise:seed6 ...
-    TIMEOUT  dist=0.9  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/fbm_noise_seed06.gif
-  Evaluating [right] fbm_noise:seed17 ...
-    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/fbm_noise_seed17.gif
-  Evaluating [right] random_walk:seed18 ...
-    TIMEOUT  dist=1.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/random_walk_seed18.gif
-  Evaluating [right] random_walk:seed11 ...
-    TIMEOUT  dist=0.6  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/random_walk_seed11.gif
-  Evaluating [right] random_walk:seed3 ...
-    TIMEOUT  dist=2.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/random_walk_seed03.gif
-  Evaluating [right] spline:seed7 ...
-    TIMEOUT  dist=0.9  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/spline_seed07.gif
-  Evaluating [right] spline:seed1 ...
-    TIMEOUT  dist=1.6  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/spline_seed01.gif
-  Evaluating [right] spline:seed2 ...
-    TIMEOUT  dist=1.3  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/spline_seed02.gif
-  Evaluating [right] wfc:seed17 ...
-    TIMEOUT  dist=1.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/wfc_seed17.gif
-  Evaluating [right] wfc:seed5 ...
-    TIMEOUT  dist=1.0  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/wfc_seed05.gif
-  Evaluating [right] wfc:seed19 ...
-    TIMEOUT  dist=3.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_right/wfc_seed19.gif
-
-  [right] test results: 0/15 success  mean_dist=1.2
-
-  [left] model: /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_left.pt
-  Evaluating [left] primitive:seed8 ...
-    TIMEOUT  dist=0.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/primitive_seed08.gif
-  Evaluating [left] primitive:seed0 ...
-    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/primitive_seed00.gif
-  Evaluating [left] primitive:seed3 ...
-    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/primitive_seed03.gif
-  Evaluating [left] fbm_noise:seed19 ...
-    TIMEOUT  dist=0.5  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/fbm_noise_seed19.gif
-  Evaluating [left] fbm_noise:seed6 ...
-    TIMEOUT  dist=0.4  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/fbm_noise_seed06.gif
-  Evaluating [left] fbm_noise:seed17 ...
-    TIMEOUT  dist=0.6  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/fbm_noise_seed17.gif
-  Evaluating [left] random_walk:seed18 ...
-    TIMEOUT  dist=0.9  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/random_walk_seed18.gif
-  Evaluating [left] random_walk:seed11 ...
-    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/random_walk_seed11.gif
-  Evaluating [left] random_walk:seed3 ...
-    TIMEOUT  dist=0.7  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/random_walk_seed03.gif
-  Evaluating [left] spline:seed7 ...
-    TIMEOUT  dist=0.2  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/spline_seed07.gif
-  Evaluating [left] spline:seed1 ...
-    TIMEOUT  dist=0.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/spline_seed01.gif
-  Evaluating [left] spline:seed2 ...
-    TIMEOUT  dist=1.4  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/spline_seed02.gif
-  Evaluating [left] wfc:seed17 ...
-    TIMEOUT  dist=1.1  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/wfc_seed17.gif
-  Evaluating [left] wfc:seed5 ...
-    TIMEOUT  dist=0.0  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/wfc_seed05.gif
-  Evaluating [left] wfc:seed19 ...
-    TIMEOUT  dist=0.0  frames=300 → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/ppo_left/wfc_seed19.gif
-
-  [left] test results: 0/15 success  mean_dist=0.6
-
-=== Pipeline complete ===
-Total time: 1653s
+  iter   60/2000 | dist= 14.6  rew= 173.7  succ=0.20 | L_pol=-0.0032  L_val=285.7262  log_std=0.421  t=219s
+  iter   70/2000 | dist=  5.5  rew=  64.7  succ=0.00 | L_pol=-0.0028  L_val=87.1728  log_std=0.408  t=255s
+  → VAL dist=12.53
+  iter   80/2000 | dist= 14.0  rew= 190.3  succ=0.40 | L_pol=-0.0025  L_val=356.8330  log_std=0.395  t=295s
+  iter   90/2000 | dist= 12.4  rew= 121.9  succ=0.00 | L_pol=-0.0050  L_val=212.8857  log_std=0.382  t=329s
+  iter  100/2000 | dist= 11.0  rew= 152.4  succ=0.25 | L_pol=-0.0057  L_val=216.6747  log_std=0.369  t=362s
+  → VAL dist=17.65
+  iter  110/2000 | dist=  5.7  rew=  78.9  succ=0.00 | L_pol=-0.0045  L_val=92.9277  log_std=0.356  t=403s
+  iter  120/2000 | dist= 17.5  rew= 196.8  succ=0.20 | L_pol=-0.0042  L_val=334.4661  log_std=0.343  t=440s
+  → VAL dist=14.36
+  iter  130/2000 | dist=  6.8  rew=  83.3  succ=0.00 | L_pol=-0.0075  L_val=82.4879  log_std=0.330  t=483s
+  iter  140/2000 | dist= 11.7  rew= 174.8  succ=0.40 | L_pol=-0.0054  L_val=243.1232  log_std=0.317  t=519s
+  iter  150/2000 | dist= 12.1  rew= 127.8  succ=0.00 | L_pol=-0.0041  L_val=280.1765  log_std=0.303  t=555s
+  → VAL dist=6.61
+  iter  160/2000 | dist= 12.2  rew= 161.6  succ=0.25 | L_pol=-0.0053  L_val=177.8126  log_std=0.290  t=597s
+  iter  170/2000 | dist= 17.4  rew= 235.2  succ=0.50 | L_pol=-0.0028  L_val=377.5107  log_std=0.277  t=633s
+  → VAL dist=17.66
+  iter  180/2000 | dist=  9.9  rew= 135.5  succ=0.25 | L_pol=-0.0045  L_val=215.8684  log_std=0.264  t=673s
+  iter  190/2000 | dist=  9.8  rew= 126.1  succ=0.20 | L_pol=-0.0028  L_val=262.8454  log_std=0.251  t=710s
+  iter  200/2000 | dist= 17.6  rew= 246.2  succ=0.60 | L_pol=-0.0007  L_val=377.0335  log_std=0.238  t=745s
+  → VAL dist=15.29
+  iter  210/2000 | dist= 12.5  rew= 164.8  succ=0.25 | L_pol=-0.0043  L_val=207.7220  log_std=0.225  t=786s
+  iter  220/2000 | dist= 10.1  rew= 103.9  succ=0.00 | L_pol=-0.0031  L_val=189.6786  log_std=0.212  t=823s
+  → VAL dist=9.21
+  iter  230/2000 | dist=  8.6  rew= 122.3  succ=0.25 | L_pol=-0.0050  L_val=131.2173  log_std=0.199  t=863s
+  iter  240/2000 | dist= 13.5  rew= 173.0  succ=0.25 | L_pol=-0.0028  L_val=174.7215  log_std=0.186  t=897s
+  iter  250/2000 | dist= 16.6  rew= 199.9  succ=0.25 | L_pol=-0.0028  L_val=296.8098  log_std=0.172  t=932s
+  → VAL dist=10.89
+  iter  260/2000 | dist= 13.4  rew= 197.0  succ=0.50 | L_pol=-0.0012  L_val=242.8261  log_std=0.159  t=972s
+  iter  270/2000 | dist= 14.0  rew= 160.1  succ=0.17 | L_pol=-0.0042  L_val=289.9116  log_std=0.146  t=1007s
+  → VAL dist=17.55
+  iter  280/2000 | dist=  4.5  rew=  60.2  succ=0.00 | L_pol=-0.0019  L_val=98.4105  log_std=0.133  t=1048s
+  iter  290/2000 | dist=  7.1  rew=  85.9  succ=0.00 | L_pol=-0.0072  L_val=120.9679  log_std=0.120  t=1082s
+  iter  300/2000 | dist=  8.0  rew= 116.2  succ=0.25 | L_pol=-0.0022  L_val=148.7563  log_std=0.107  t=1117s
+  → VAL dist=8.77
+  iter  310/2000 | dist=  3.4  rew=  42.6  succ=0.00 | L_pol=-0.0053  L_val=56.7260  log_std=0.094  t=1158s
+  iter  320/2000 | dist= 11.8  rew= 139.0  succ=0.17 | L_pol=-0.0020  L_val=342.9105  log_std=0.081  t=1192s
+  → VAL dist=11.27
+  iter  330/2000 | dist=  9.4  rew= 123.7  succ=0.20 | L_pol=-0.0050  L_val=195.2497  log_std=0.068  t=1232s
+  iter  340/2000 | dist=  7.5  rew= 110.2  succ=0.25 | L_pol=-0.0036  L_val=204.3733  log_std=0.055  t=1265s
+  iter  350/2000 | dist=  8.7  rew= 110.4  succ=0.17 | L_pol=-0.0055  L_val=235.9274  log_std=0.041  t=1301s
+  → VAL dist=17.57
+  iter  360/2000 | dist= 13.0  rew= 195.5  succ=0.50 | L_pol=-0.0037  L_val=249.2495  log_std=0.028  t=1339s
+  iter  370/2000 | dist=  5.6  rew=  62.2  succ=0.00 | L_pol=0.0003  L_val=278.6956  log_std=0.015  t=1372s
+  → VAL dist=9.97
+  iter  380/2000 | dist=  4.3  rew=  53.8  succ=0.00 | L_pol=0.0020  L_val=208.2366  log_std=0.002  t=1411s
+  iter  390/2000 | dist=  9.7  rew= 131.1  succ=0.20 | L_pol=-0.0022  L_val=223.9665  log_std=-0.011  t=1447s
+  iter  400/2000 | dist=  7.4  rew=  79.4  succ=0.00 | L_pol=-0.0003  L_val=146.6693  log_std=-0.024  t=1481s
+  → VAL dist=14.88
+  iter  410/2000 | dist=  9.3  rew= 127.3  succ=0.25 | L_pol=-0.0030  L_val=172.5494  log_std=-0.037  t=1521s
+  iter  420/2000 | dist=  8.6  rew=  90.8  succ=0.00 | L_pol=-0.0015  L_val=165.9250  log_std=-0.050  t=1556s
+  → VAL dist=9.48
+  iter  430/2000 | dist=  8.8  rew= 130.0  succ=0.25 | L_pol=-0.0008  L_val=211.4979  log_std=-0.063  t=1595s
+  iter  440/2000 | dist=  9.0  rew= 104.2  succ=0.00 | L_pol=0.0020  L_val=125.7571  log_std=-0.076  t=1631s
+  iter  450/2000 | dist= 12.4  rew= 158.1  succ=0.25 | L_pol=-0.0003  L_val=209.9937  log_std=-0.090  t=1681s
+  → VAL dist=14.66
+  iter  460/2000 | dist=  8.8  rew= 121.0  succ=0.25 | L_pol=-0.0062  L_val=178.2537  log_std=-0.103  t=1729s
+  iter  470/2000 | dist= 10.6  rew= 121.9  succ=0.00 | L_pol=-0.0002  L_val=153.5026  log_std=-0.116  t=1772s
+  → VAL dist=9.58
+  iter  480/2000 | dist= 17.9  rew= 241.8  succ=0.50 | L_pol=-0.0009  L_val=374.4341  log_std=-0.129  t=1819s
+  iter  490/2000 | dist=  8.7  rew=  99.5  succ=0.00 | L_pol=0.0008  L_val=211.3909  log_std=-0.142  t=1860s
+  iter  500/2000 | dist=  4.2  rew=  49.5  succ=0.00 | L_pol=0.0080  L_val=179.4614  log_std=-0.155  t=1900s
+  → VAL dist=11.43
+  iter  510/2000 | dist= 12.6  rew= 170.4  succ=0.40 | L_pol=-0.0060  L_val=312.4864  log_std=-0.168  t=1942s
+  iter  520/2000 | dist=  9.4  rew= 124.1  succ=0.20 | L_pol=-0.0030  L_val=246.0611  log_std=-0.181  t=1977s
+  → VAL dist=17.12
+  iter  530/2000 | dist= 14.2  rew= 180.5  succ=0.25 | L_pol=-0.0011  L_val=219.4037  log_std=-0.194  t=2015s
+  iter  540/2000 | dist= 13.1  rew= 171.6  succ=0.33 | L_pol=-0.0027  L_val=249.7822  log_std=-0.207  t=2051s
+  iter  550/2000 | dist= 21.4  rew= 301.9  succ=0.80 | L_pol=0.0003  L_val=493.8877  log_std=-0.221  t=2087s
+  → VAL dist=13.20
+  iter  560/2000 | dist= 10.4  rew= 111.0  succ=0.00 | L_pol=-0.0014  L_val=215.4016  log_std=-0.234  t=2127s
+  iter  570/2000 | dist= 12.0  rew= 130.8  succ=0.00 | L_pol=0.0000  L_val=282.3668  log_std=-0.247  t=2161s
+  → VAL dist=14.03
+  iter  580/2000 | dist= 14.7  rew= 156.6  succ=0.00 | L_pol=-0.0012  L_val=245.0189  log_std=-0.260  t=2199s
+  iter  590/2000 | dist=  7.6  rew=  96.9  succ=0.00 | L_pol=-0.0029  L_val=125.1149  log_std=-0.273  t=2234s
+  iter  600/2000 | dist= 15.9  rew= 192.0  succ=0.25 | L_pol=-0.0031  L_val=167.1845  log_std=-0.286  t=2268s
+  → VAL dist=4.74
+  iter  610/2000 | dist=  9.0  rew=  99.8  succ=0.00 | L_pol=-0.0031  L_val=164.6032  log_std=-0.299  t=2308s
+  iter  620/2000 | dist= 13.9  rew= 146.2  succ=0.00 | L_pol=-0.0013  L_val=150.7881  log_std=-0.312  t=2343s
+  → VAL dist=12.32
+  iter  630/2000 | dist= 11.0  rew= 108.8  succ=0.00 | L_pol=-0.0020  L_val=102.7488  log_std=-0.325  t=2386s
+  iter  640/2000 | dist= 14.7  rew= 182.5  succ=0.25 | L_pol=0.0019  L_val=245.8143  log_std=-0.338  t=2420s
+  iter  650/2000 | dist=  4.9  rew=  53.2  succ=0.00 | L_pol=-0.0029  L_val=128.5152  log_std=-0.352  t=2455s
+  → VAL dist=5.24
+  iter  660/2000 | dist=  2.8  rew=  42.9  succ=0.00 | L_pol=-0.0024  L_val=130.4048  log_std=-0.365  t=2500s
+  iter  670/2000 | dist=  8.2  rew=  90.2  succ=0.00 | L_pol=-0.0011  L_val=132.4782  log_std=-0.378  t=2537s
+  → VAL dist=11.80
+  iter  680/2000 | dist=  6.0  rew=  70.3  succ=0.00 | L_pol=-0.0019  L_val=109.6207  log_std=-0.391  t=2578s
+  iter  690/2000 | dist= 10.4  rew= 138.7  succ=0.25 | L_pol=0.0047  L_val=347.0471  log_std=-0.404  t=2612s
+  iter  700/2000 | dist= 14.3  rew= 176.9  succ=0.25 | L_pol=-0.0010  L_val=306.3837  log_std=-0.417  t=2648s
+  → VAL dist=11.21

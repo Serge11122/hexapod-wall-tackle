@@ -3,7 +3,7 @@ TerrainTraversalEnv — gymnasium-compatible RL environment.
 
 Wraps TerrainRobotPhysics + LocalMap into a standard reset/step interface.
 
-Observation (OBS_DIM = 66 + 180 = 246):
+Observation (OBS_DIM = 39 + 180 = 219):
   [0:8]    joint angles (normalised)
   [8:16]   joint angular velocities (clipped, normalised)
   [16:24]  joint torques (normalised)
@@ -12,15 +12,16 @@ Observation (OBS_DIM = 66 + 180 = 246):
   [32:36]  foot heights (normalised)
   [36:38]  body velocity vx, vy (normalised)
   [38:39]  body pitch (normalised)
-  [39:246] 1D local map window (WINDOW_CELLS × 3)
+  [39:219] 1D local map window (WINDOW_CELLS × 3)
 
 Action (ACT_DIM = 8):
-  target hip+knee angles for 4 legs, clipped to [-π, π]
+  target hip+knee angles for 4 legs, normalised to [-1, 1] → scaled to [-π, π]
+
+All gait is entirely model-generated — no hardcoded animation sequences.
 """
 
-import math
 import json
-from pathlib import Path
+import math
 
 import numpy as np
 
@@ -53,16 +54,25 @@ PITCH_NORM   = ANGLE_NORM
 
 # ── Episode params ─────────────────────────────────────────────────────────────
 MAX_STEPS       = 500
-FALL_Y          = 0.2     # body COM below this → episode done (fell)
+FALL_Y          = -0.5    # body COM below terrain_h + this → episode done (fell)
+FALL_PITCH      = 0.65    # body pitch beyond ±37° → episode done (tipped over)
 SUCCESS_DIST    = 25.0    # body moved this far → success
-DT              = 1.0 / 5   # 5 fps render rate
+DT              = 1.0 / 10  # 10 fps
 
 # ── Reward shaping ─────────────────────────────────────────────────────────────
-PROGRESS_SCALE  = 2.0
-ALIVE_BONUS     = 0.05
-FALL_PENALTY    = -20.0
-SUCCESS_BONUS   = 50.0
-HEIGHT_PEN_GAIN = 3.0   # penalty for deviating too much from walk height
+PROGRESS_SCALE   = 10.0   # reward per metre forward progress (dominant signal)
+CONTACT_BONUS    = 0.04   # tiny contact bonus (incentivise grounding feet, not standing)
+FALL_PENALTY     = -10.0  # moderate fall penalty: walking-then-falling still better than standing
+SUCCESS_BONUS    = 100.0  # large success bonus
+
+# Neutral joint angles (radians) for physics settling — model-derived, no gait file
+# Matches initial leg positions in terrain_physics._build_leg:
+#   legs 0,3 (front/rear outer): theta1=-0.896, theta2=-1.554
+#   legs 1,2 (front/rear inner): theta1=-0.987, theta2=-1.062
+NEUTRAL_ANGLES = np.array(
+    [-0.896, -1.554, -0.987, -1.062, -0.987, -1.062, -0.896, -1.554],
+    dtype=np.float32,
+)
 
 
 class TerrainTraversalEnv:
@@ -112,16 +122,10 @@ class TerrainTraversalEnv:
         )
         self._lmap = LocalMap(env_left=env_left, env_right=env_right)
 
-        # Settling steps
-        from robot_motion.body import LEG_MOUNTS
-        import json as _json
-        gait_name = "right" if self.direction > 0 else "left"
-        gait_path = Path(__file__).parent.parent.parent / "robot_motion" / f"gait_{gait_name}.json"
-        with open(gait_path) as f:
-            gait = _json.load(f)["frames"]
-        settle_action = _gait_frame_to_action(gait[0])
-        for _ in range(4):
-            self._physics.step(settle_action)
+        # Settling: allow gravity to bring robot down onto terrain naturally.
+        # Uses neutral standing joint angles — no hardcoded gait animation.
+        for _ in range(25):
+            self._physics.step(NEUTRAL_ANGLES)
 
         self._step_count = 0
         self._start_x    = self._physics.body.position.x
@@ -153,23 +157,28 @@ class TerrainTraversalEnv:
         obs  = self._observe()
         bx, by, bth, vx, vy, omega = self._physics.get_body_state()
 
-        # Reward
-        dx       = (bx - self._prev_x) * self.direction
-        progress = dx * PROGRESS_SCALE
-        alive    = ALIVE_BONUS
-        height_dev = abs(by - (self._physics._terrain_height_est + WALK_HEIGHT))
-        h_pen    = -HEIGHT_PEN_GAIN * max(0.0, height_dev - 0.5)
-        reward   = progress + alive + h_pen
+        # ── Reward components ─────────────────────────────────────────────────
+        # 1. Directional progress — dominant; stationary = 0, walking = positive
+        dx     = (bx - self._prev_x) * self.direction
+        reward = dx * PROGRESS_SCALE
         self._prev_x = bx
 
-        # Done conditions
+        # 2. Tiny contact bonus: encourage foot-ground contact while walking
+        n_contacts = int(sum(self._physics._foot_contact))
+        reward    += n_contacts * CONTACT_BONUS
+
+        # ── Done conditions ───────────────────────────────────────────────────
         dist  = abs(bx - self._start_x)
         done  = False
         info  = {"dist": dist, "success": False, "fall": False}
 
-        if by < FALL_Y:
-            reward += FALL_PENALTY
-            done    = True
+        terrain_h = self._physics._terrain_height_est
+        pitched_over = abs(bth) > FALL_PITCH
+        below_ground = by < terrain_h + FALL_Y
+
+        if pitched_over or below_ground:
+            reward     += FALL_PENALTY
+            done        = True
             info["fall"] = True
         elif dist >= SUCCESS_DIST:
             reward += SUCCESS_BONUS
@@ -206,13 +215,3 @@ class TerrainTraversalEnv:
         return self._physics.get_render_pose()
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _gait_frame_to_action(frame: dict) -> np.ndarray:
-    """Convert a gait JSON frame to an 8-element target joint angles array."""
-    angles = np.zeros(8, dtype=np.float32)
-    for leg in frame["legs"]:
-        i = leg["id"]
-        angles[2 * i]     = leg["theta1"]
-        angles[2 * i + 1] = leg["theta2"]
-    return angles

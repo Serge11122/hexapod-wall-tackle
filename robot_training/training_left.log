@@ -1,0 +1,116 @@
+  PPO [left]: LSTM + fixed-std — mean forced to learn walking
+  [left] Good training terrains: 59/70
+
+============================================================
+PPO-LSTM training [left]  iters=700  device=cuda
+============================================================
+  iter   10/700 | dist=  2.3  rew=   7.9  succ=0.00 | L_pol=-0.0010  L_val=218.3013  log_std=0.463  t=44s
+  iter   20/700 | dist=  1.8  rew=  -6.5  succ=0.00 | L_pol=-0.0005  L_val=101.6084  log_std=0.425  t=79s
+  → VAL dist=0.45
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter   30/700 | dist=  3.6  rew=  34.8  succ=0.00 | L_pol=-0.0008  L_val=293.4695  log_std=0.388  t=125s
+  iter   40/700 | dist=  1.6  rew=   0.6  succ=0.00 | L_pol=-0.0008  L_val=228.5806  log_std=0.350  t=163s
+  iter   50/700 | dist=  3.3  rew=  29.1  succ=0.00 | L_pol=-0.0013  L_val=132.3079  log_std=0.313  t=205s
+  → VAL dist=0.42
+  iter   60/700 | dist=  1.5  rew=   1.2  succ=0.00 | L_pol=-0.0014  L_val=223.1837  log_std=0.275  t=253s
+  iter   70/700 | dist=  4.0  rew=  34.9  succ=0.00 | L_pol=-0.0016  L_val=187.9779  log_std=0.238  t=288s
+  → VAL dist=0.38
+  iter   80/700 | dist=  1.8  rew=   7.2  succ=0.00 | L_pol=-0.0016  L_val=129.6545  log_std=0.201  t=335s
+  iter   90/700 | dist=  1.0  rew= -11.4  succ=0.00 | L_pol=-0.0025  L_val=139.0388  log_std=0.163  t=370s
+  iter  100/700 | dist=  1.2  rew=  -5.5  succ=0.00 | L_pol=-0.0008  L_val=248.5824  log_std=0.126  t=411s
+  → VAL dist=0.34
+  iter  110/700 | dist=  2.3  rew=  22.8  succ=0.00 | L_pol=-0.0031  L_val=101.9470  log_std=0.088  t=445s
+  iter  120/700 | dist=  1.3  rew=   7.9  succ=0.00 | L_pol=-0.0022  L_val=147.0511  log_std=0.051  t=483s
+  → VAL dist=0.10
+  iter  130/700 | dist=  1.4  rew=   9.8  succ=0.00 | L_pol=-0.0033  L_val=59.9440  log_std=0.013  t=523s
+  iter  140/700 | dist=  1.9  rew=   6.6  succ=0.00 | L_pol=-0.0019  L_val=162.6299  log_std=-0.024  t=563s
+  iter  150/700 | dist=  3.7  rew=  17.8  succ=0.00 | L_pol=-0.0013  L_val=157.8754  log_std=-0.061  t=602s
+  → VAL dist=0.13
+  iter  160/700 | dist=  3.3  rew=  18.3  succ=0.00 | L_pol=-0.0031  L_val=124.2300  log_std=-0.099  t=636s
+  iter  170/700 | dist=  1.6  rew=   2.9  succ=0.00 | L_pol=-0.0006  L_val=173.6415  log_std=-0.136  t=669s
+  → VAL dist=0.90
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter  180/700 | dist=  4.7  rew=  38.6  succ=0.00 | L_pol=-0.0012  L_val=178.3775  log_std=-0.174  t=704s
+  iter  190/700 | dist=  2.0  rew=   6.2  succ=0.00 | L_pol=-0.0020  L_val=209.7350  log_std=-0.211  t=736s
+  iter  200/700 | dist=  3.9  rew=  30.8  succ=0.00 | L_pol=-0.0015  L_val=258.4530  log_std=-0.249  t=769s
+  → VAL dist=0.79
+  iter  210/700 | dist=  2.8  rew=   9.6  succ=0.00 | L_pol=0.0012  L_val=271.1882  log_std=-0.286  t=803s
+  iter  220/700 | dist=  2.7  rew=  24.7  succ=0.08 | L_pol=-0.0018  L_val=301.9072  log_std=-0.324  t=836s
+  → VAL dist=0.31
+  iter  230/700 | dist=  1.8  rew=   4.6  succ=0.00 | L_pol=0.0015  L_val=158.7108  log_std=-0.361  t=872s
+  iter  240/700 | dist=  5.4  rew=  56.5  succ=0.00 | L_pol=-0.0003  L_val=261.2004  log_std=-0.398  t=905s
+  iter  250/700 | dist=  4.2  rew=  27.7  succ=0.00 | L_pol=0.0014  L_val=198.0118  log_std=-0.436  t=937s
+  → VAL dist=0.87
+  iter  260/700 | dist=  4.1  rew=  35.3  succ=0.00 | L_pol=-0.0019  L_val=225.0382  log_std=-0.473  t=970s
+  iter  270/700 | dist=  3.7  rew=  25.0  succ=0.00 | L_pol=-0.0025  L_val=211.8425  log_std=-0.511  t=1002s
+  → VAL dist=0.35
+  iter  280/700 | dist=  9.4  rew= 112.4  succ=0.17 | L_pol=0.0010  L_val=392.1537  log_std=-0.548  t=1040s
+  iter  290/700 | dist= 16.7  rew= 221.2  succ=0.50 | L_pol=0.0054  L_val=417.5731  log_std=-0.586  t=1088s
+  iter  300/700 | dist= 10.3  rew= 128.8  succ=0.20 | L_pol=0.0004  L_val=217.1633  log_std=-0.623  t=1130s
+  → VAL dist=2.55
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter  310/700 | dist=  2.7  rew=  25.9  succ=0.00 | L_pol=-0.0002  L_val=116.9519  log_std=-0.660  t=1184s
+  iter  320/700 | dist=  6.1  rew=  54.2  succ=0.00 | L_pol=-0.0009  L_val=148.4392  log_std=-0.698  t=1230s
+  → VAL dist=7.61
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter  330/700 | dist=  6.5  rew=  68.7  succ=0.00 | L_pol=-0.0018  L_val=116.1291  log_std=-0.735  t=1282s
+  iter  340/700 | dist=  6.9  rew=  94.7  succ=0.25 | L_pol=0.0077  L_val=319.6629  log_std=-0.773  t=1327s
+  iter  350/700 | dist= 10.7  rew= 133.1  succ=0.25 | L_pol=-0.0003  L_val=361.4638  log_std=-0.810  t=1369s
+  → VAL dist=7.59
+  iter  360/700 | dist=  6.8  rew=  71.4  succ=0.00 | L_pol=-0.0019  L_val=94.4750  log_std=-0.848  t=1418s
+  iter  370/700 | dist= 14.0  rew= 164.0  succ=0.25 | L_pol=0.0027  L_val=428.3450  log_std=-0.885  t=1463s
+  → VAL dist=5.14
+  iter  380/700 | dist=  9.0  rew= 126.8  succ=0.33 | L_pol=0.0008  L_val=322.4368  log_std=-0.922  t=1518s
+  iter  390/700 | dist= 10.4  rew= 123.1  succ=0.22 | L_pol=0.0019  L_val=321.9680  log_std=-0.960  t=1562s
+  iter  400/700 | dist= 13.5  rew= 164.6  succ=0.33 | L_pol=0.0036  L_val=243.8365  log_std=-0.997  t=1605s
+  → VAL dist=7.62
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter  410/700 | dist= 10.2  rew= 126.0  succ=0.25 | L_pol=0.0015  L_val=309.1167  log_std=-1.035  t=1658s
+  iter  420/700 | dist=  8.4  rew= 114.7  succ=0.20 | L_pol=0.0021  L_val=140.4043  log_std=-1.072  t=1705s
+  → VAL dist=3.59
+  iter  430/700 | dist= 15.5  rew= 160.7  succ=0.00 | L_pol=0.0031  L_val=155.0718  log_std=-1.110  t=1759s
+  iter  440/700 | dist=  7.9  rew=  87.5  succ=0.00 | L_pol=0.0007  L_val=158.3579  log_std=-1.147  t=1803s
+  iter  450/700 | dist= 13.1  rew= 157.9  succ=0.20 | L_pol=0.0004  L_val=207.6468  log_std=-1.184  t=1848s
+  → VAL dist=2.84
+  iter  460/700 | dist= 15.4  rew= 190.3  succ=0.40 | L_pol=0.0021  L_val=253.0536  log_std=-1.222  t=1904s
+  iter  470/700 | dist=  8.0  rew=  90.2  succ=0.00 | L_pol=0.0006  L_val=108.0895  log_std=-1.259  t=1945s
+  → VAL dist=8.09
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter  480/700 | dist= 12.5  rew= 131.7  succ=0.00 | L_pol=-0.0000  L_val=137.8455  log_std=-1.297  t=2006s
+  iter  490/700 | dist=  6.4  rew=  61.6  succ=0.00 | L_pol=-0.0004  L_val=73.9919  log_std=-1.334  t=2047s
+  iter  500/700 | dist= 10.1  rew= 130.0  succ=0.29 | L_pol=0.0078  L_val=180.0986  log_std=-1.372  t=2093s
+  → VAL dist=8.53
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter  510/700 | dist=  6.1  rew=  68.7  succ=0.00 | L_pol=0.0035  L_val=55.3785  log_std=-1.409  t=2155s
+  iter  520/700 | dist=  5.0  rew=  53.3  succ=0.00 | L_pol=-0.0008  L_val=80.3332  log_std=-1.446  t=2202s
+  → VAL dist=4.75
+  iter  530/700 | dist=  7.9  rew=  82.1  succ=0.00 | L_pol=0.0024  L_val=90.2242  log_std=-1.484  t=2261s
+  iter  540/700 | dist=  5.6  rew=  77.8  succ=0.00 | L_pol=0.0037  L_val=66.4770  log_std=-1.521  t=2302s
+  iter  550/700 | dist=  6.2  rew=  74.5  succ=0.00 | L_pol=0.0127  L_val=91.6082  log_std=-1.559  t=2344s
+  → VAL dist=7.78
+  iter  560/700 | dist=  2.9  rew=  37.6  succ=0.00 | L_pol=0.0046  L_val=44.8253  log_std=-1.596  t=2400s
+  iter  570/700 | dist=  4.5  rew=  60.8  succ=0.00 | L_pol=0.0034  L_val=28.4208  log_std=-1.634  t=2443s
+  → VAL dist=5.64
+  iter  580/700 | dist=  5.4  rew=  50.3  succ=0.00 | L_pol=0.0043  L_val=65.3921  log_std=-1.671  t=2502s
+  iter  590/700 | dist=  5.0  rew=  72.4  succ=0.00 | L_pol=0.0036  L_val=35.0671  log_std=-1.709  t=2547s
+  iter  600/700 | dist= 14.2  rew= 154.7  succ=0.00 | L_pol=0.0104  L_val=83.0226  log_std=-1.746  t=2589s
+  → VAL dist=4.77
+  iter  610/700 | dist=  9.0  rew= 122.5  succ=0.25 | L_pol=0.0025  L_val=86.5947  log_std=-1.783  t=2650s
+  iter  620/700 | dist=  8.6  rew=  98.1  succ=0.00 | L_pol=0.0058  L_val=54.4530  log_std=-1.821  t=2687s
+  → VAL dist=3.65
+  iter  630/700 | dist= 11.3  rew= 154.3  succ=0.25 | L_pol=0.0128  L_val=115.5757  log_std=-1.858  t=2748s
+  iter  640/700 | dist=  6.4  rew=  84.2  succ=0.00 | L_pol=0.0088  L_val=43.7800  log_std=-1.896  t=2787s
+  iter  650/700 | dist= 11.0  rew= 141.1  succ=0.20 | L_pol=0.0339  L_val=117.4938  log_std=-1.933  t=2827s
+  → VAL dist=9.88
+  ✓ best saved → robot_training/models/ppo_best_left.pt
+  iter  660/700 | dist=  2.0  rew=  51.4  succ=0.00 | L_pol=0.0049  L_val=18.6808  log_std=-1.971  t=2889s
+  iter  670/700 | dist= 13.6  rew= 155.3  succ=0.00 | L_pol=0.0068  L_val=94.8665  log_std=-2.008  t=2930s
+  → VAL dist=4.36
+  iter  680/700 | dist= 13.0  rew= 144.3  succ=0.00 | L_pol=0.0033  L_val=60.9367  log_std=-2.045  t=2989s
+  iter  690/700 | dist=  7.8  rew=  91.2  succ=0.00 | L_pol=0.0033  L_val=35.5379  log_std=-2.083  t=3034s
+  iter  700/700 | dist=  8.7  rew= 118.8  succ=0.20 | L_pol=0.0225  L_val=70.1508  log_std=-2.120  t=3077s
+  → VAL dist=4.37
+
+Final model → robot_training/models/ppo_final_left.pt
+Best val dist = 9.88
+LEFT TRAINING COMPLETE

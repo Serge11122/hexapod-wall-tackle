@@ -1,0 +1,6 @@
+
+Evaluating BC [left] on 15 test terrains ...
+  [left] primitive:8  TIMEOUT  dist=1.44  frames=500 → primitive_seed08.gif
+  [left] primitive:0  TIMEOUT  dist=6.01  frames=500 → primitive_seed00.gif
+  [left] primitive:3  TIMEOUT  dist=1.05  frames=500 → primitive_seed03.gif
+  [left] fbm_noise:19  TIMEOUT  dist=0.24  frames=500 → fbm_noise_seed19.gif

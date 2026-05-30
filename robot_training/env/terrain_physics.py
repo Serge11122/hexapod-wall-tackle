@@ -2,11 +2,11 @@
 Extended RobotPhysics for terrain traversal training.
 
 Key differences from robot_environment/contact_physics.py:
-  - No GrooveJoint: height control replaced by explicit adaptive spring force
+  - No GrooveJoint: height control replaced by gravity-compensated spring force
   - Terrain loaded from JSON (multi-segment polyline + bumpers)
   - Foot contact detection via pymunk collision handlers
   - Exposes sensory observation: joint angles, velocities, contact flags, forces
-  - Adaptive height target updated from EWMA of foot contact heights
+  - Height target derived from ground-truth terrain JSON (stable control signal)
 """
 
 import math
@@ -15,7 +15,7 @@ import numpy as np
 
 from robot_motion.body import (
     GRAVITY, BODY_HALF_H, BODY_HALF_LEN, LEG_L1, LEG_L2, LEG_MOUNTS,
-    BODY_MASS, LEG_SEGMENT_MASS, STATIC_FRICTION,
+    BODY_MASS, LEG_SEGMENT_MASS, STATIC_FRICTION, TOTAL_MASS,
 )
 from robot_training.env.terrain_loader import (
     load_terrain_into_space,
@@ -24,17 +24,16 @@ from robot_training.env.terrain_loader import (
 )
 
 # ── Control params ─────────────────────────────────────────────────────────────
-JOINT_KP        = 8.0
-JOINT_MAX_FORCE = 15.0
-PITCH_LIMIT     = 0.17    # ±10°
-LEVEL_MAX_FORCE = 20.0
-SUBSTEPS        = 40
+JOINT_KP        = 12.0   # faster joint response for terrain adaption
+JOINT_MAX_FORCE = 30.0   # strong enough to climb slopes and stairs
+PITCH_LIMIT     = 0.25   # ±14° — allow more tilt on uneven terrain
+LEVEL_MAX_FORCE = 30.0   # stronger pitch damping
+SUBSTEPS        = 50     # higher accuracy physics integration
 
-# ── Adaptive height controller ─────────────────────────────────────────────────
-HEIGHT_KP     = 60.0    # spring gain (N/m)
-HEIGHT_KD     = 20.0    # damping gain (N·s/m)
-WALK_HEIGHT   = 1.9     # nominal body COM above terrain
-HEIGHT_EWMA   = 0.92    # exponential moving average for terrain height estimate
+# ── Height controller (gravity-compensated spring) ────────────────────────────
+HEIGHT_KP   = 500.0   # N/m — stiffer spring for terrain-following
+HEIGHT_KD   = 80.0    # N·s/m — stronger damping
+WALK_HEIGHT = 1.9     # body COM above terrain surface
 
 
 class TerrainRobotPhysics:
@@ -70,13 +69,13 @@ class TerrainRobotPhysics:
         self._build_robot(start_x, start_y)
         self._setup_collision_handlers()
 
-        # Sensory arrays (populated after each step)
         self.obs_joint_angles  = np.zeros(8, dtype=np.float32)
         self.obs_joint_vels    = np.zeros(8, dtype=np.float32)
         self.obs_joint_torques = np.zeros(8, dtype=np.float32)
         self.obs_foot_contact  = np.zeros(4, dtype=np.float32)
         self.obs_foot_forces   = np.zeros(4, dtype=np.float32)
         self.obs_foot_heights  = np.zeros(4, dtype=np.float32)
+        self._terrain_height_est = terrain_height_at(self._terrain_segs, start_x)
 
     # ── Robot construction ────────────────────────────────────────────────────
 
@@ -105,8 +104,6 @@ class TerrainRobotPhysics:
         self.legs = []
         for m in LEG_MOUNTS:
             self._build_leg(m["id"], m["local_x"], bx, by)
-
-        self._terrain_height_est = terrain_height_at(self._terrain_segs, bx)
 
     def _build_leg(self, lid: int, mx: float, bx: float, by: float):
         if lid in (1, 2):
@@ -215,21 +212,18 @@ class TerrainRobotPhysics:
             knee_err = (t2_t - t2_curr + math.pi) % (2 * math.pi) - math.pi
             leg["knee_motor"].rate = JOINT_KP * knee_err
 
-        # Adaptive height controller ───────────────────────────────────────
-        # Update terrain height estimate from foot contacts
-        n_contact = sum(self._foot_contact)
-        if n_contact > 0:
-            contact_ys = [self._contact_data.get(leg["id"], self._terrain_height_est)
-                          for i, leg in enumerate(self.legs)
-                          if self._foot_contact[i]]
-            measured_h = sum(contact_ys) / len(contact_ys)
-            self._terrain_height_est = (HEIGHT_EWMA * self._terrain_height_est
-                                        + (1 - HEIGHT_EWMA) * measured_h)
-
-        target_y   = self._terrain_height_est + WALK_HEIGHT
-        bx, by     = self.body.position
-        vy         = self.body.velocity.y
-        spring_f   = HEIGHT_KP * (target_y - by) + HEIGHT_KD * (-vy)
+        # Gravity-compensated height controller ───────────────────────────
+        # Use ground-truth terrain height from JSON for stable control signal.
+        # At target height with zero velocity: spring_f = GRAVITY*TOTAL_MASS,
+        # exactly counteracting gravity so no equilibrium sag.
+        bx, by   = self.body.position
+        vy       = self.body.velocity.y
+        terrain_h = terrain_height_at(self._terrain_segs, bx)
+        self._terrain_height_est = terrain_h   # keep in sync for env/obs use
+        target_y  = terrain_h + WALK_HEIGHT
+        spring_f  = (HEIGHT_KP * (target_y - by)
+                     + HEIGHT_KD * (-vy)
+                     + GRAVITY * TOTAL_MASS)
         self.body.apply_force_at_world_point((0.0, spring_f), (bx, by))
 
         # Sub-step integration

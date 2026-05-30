@@ -1,6 +1,8 @@
 """
 Evaluate trained models on test terrain set and save GIF visualizations.
 
+Uses RolloutPlanner for physics-based action selection (N candidates, K lookahead).
+
 Output: robot_vis/vid/ppo_right/terrain_NN.gif
         robot_vis/vid/ppo_left/terrain_NN.gif
 """
@@ -13,13 +15,14 @@ import numpy as np
 import torch
 from PIL import Image, ImageDraw
 
-from robot_training.env.terrain_env import TerrainTraversalEnv
+from robot_training.env.terrain_env import TerrainTraversalEnv, DT
 from robot_training.models.policy import load_policy
+from robot_training.planning.rollout_planner import RolloutPlanner
 from robot_training.dataset import TerrainEntry
 from robot_vis.renderer import world_to_px, draw_robot
 
 VID_DIR   = Path(__file__).parent.parent.parent / "robot_vis" / "vid"
-FPS       = 5
+FPS       = int(round(1.0 / DT))
 
 FRAME_W   = 1400
 FRAME_H   = 600
@@ -71,10 +74,11 @@ def _render_frame(pose, terrain_meta, cx, cy, scale, label) -> Image.Image:
 
 def _evaluate_single(
     policy,
+    planner: RolloutPlanner,
     env: TerrainTraversalEnv,
     entry: TerrainEntry,
     device: torch.device,
-    max_frames: int = 300,
+    max_frames: int = 600,
 ) -> tuple[list[Image.Image], dict]:
     obs  = env.reset(entry)
     done = False
@@ -89,21 +93,23 @@ def _evaluate_single(
 
     images = []
     info   = {}
-    policy.eval()
 
-    with torch.no_grad():
-        while not done and fi < max_frames:
-            pose  = env.render()
-            bx, by, bth, vx, vy, _ = env._physics.get_body_state()
-            n_contact = sum(env._physics._foot_contact)
-            label = (f"{entry.method}:{entry.seed}  frame={fi:03d}  "
-                     f"x={bx:.1f}  vx={vx:.2f}  contacts={n_contact}")
-            images.append(_render_frame(pose, terrain_meta, cx, cy, scale, label))
+    # Reset planner's LSTM hidden state for each new episode
+    planner.reset_hidden()
 
-            obs_t  = torch.from_numpy(obs).unsqueeze(0).to(device)
-            action, _, _ = policy.act(obs_t, deterministic=True)
-            obs, _, done, info = env.step(action.squeeze(0).cpu().numpy())
-            fi += 1
+    while not done and fi < max_frames:
+        pose      = env.render()
+        bx, by, bth, vx, vy, _ = env._physics.get_body_state()
+        n_contact = sum(env._physics._foot_contact)
+        lbl = (f"{entry.method}:{entry.seed}  frame={fi:03d}  "
+               f"x={bx:.2f}  vx={vx:.2f}  ct={n_contact}  pitch={bth:.2f}")
+        images.append(_render_frame(pose, terrain_meta, cx, cy, scale, lbl))
+
+        # Physics-lookahead + value-guided action selection
+        joint_targets = planner.act(obs, env._physics, env._lmap, env.direction)
+        action_norm   = joint_targets / math.pi
+        obs, _, done, info = env.step(action_norm)
+        fi += 1
 
     return images, info
 
@@ -112,23 +118,25 @@ def evaluate_direction(
     direction: int,
     model_path: str | Path,
     test_entries: list[TerrainEntry],
-    max_frames: int = 300,
+    max_frames: int = 600,
     device: torch.device = None,
+    out_subdir: str = "ppo",
 ) -> None:
     if device is None:
         device = torch.device("cpu")
 
-    label     = "right" if direction > 0 else "left"
-    out_dir   = VID_DIR / f"ppo_{label}"
+    label   = "right" if direction > 0 else "left"
+    out_dir = VID_DIR / f"{out_subdir}_{label}"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    policy = load_policy(str(model_path), device)
-    env    = TerrainTraversalEnv(direction=direction)
+    policy  = load_policy(str(model_path), device)
+    planner = RolloutPlanner(policy, device, n_candidates=12, lookahead=4)
+    env     = TerrainTraversalEnv(direction=direction)
 
     results = []
     for entry in test_entries:
         print(f"  Evaluating [{label}] {entry.method}:seed{entry.seed} ...")
-        images, info = _evaluate_single(policy, env, entry, device, max_frames)
+        images, info = _evaluate_single(policy, planner, env, entry, device, max_frames)
         if not images:
             print("    No frames generated, skipping")
             continue
@@ -148,7 +156,6 @@ def evaluate_direction(
         results.append({"method": entry.method, "seed": entry.seed,
                         "dist": info.get("dist", 0), "status": status})
 
-    # Summary
     n_succ = sum(1 for r in results if r["status"] == "SUCCESS")
     mean_d = np.mean([r["dist"] for r in results]) if results else 0.0
     print(f"\n  [{label}] test results: {n_succ}/{len(results)} success  mean_dist={mean_d:.1f}")

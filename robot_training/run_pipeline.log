@@ -1,0 +1,52 @@
+Device: cuda
+
+Dataset: total=100  train=70  val=15  test=15
+  PPO [right]: loading BC init from /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/bc_right.pt
+  [right] Good training terrains: 20/70
+
+============================================================
+PPO training [right]  iters=600  device=cuda
+============================================================
+  iter   10/600 | dist=  2.8  rew=  27.7  succ=0.00 | L_pol=-0.0153  L_val=45.7791  t=10s
+  iter   20/600 | dist=  1.2  rew=  12.5  succ=0.00 | L_pol=-0.0299  L_val=3.7636  t=20s
+  → VAL dist=0.72
+  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
+  iter   30/600 | dist=  5.0  rew=  29.9  succ=0.00 | L_pol=-0.0194  L_val=38.5161  t=37s
+  iter   40/600 | dist= 17.6  rew= 175.6  succ=0.00 | L_pol=0.0070  L_val=114.4180  t=46s
+  → VAL dist=1.05
+  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
+  iter   50/600 | dist=  2.4  rew=  24.4  succ=0.00 | L_pol=-0.0132  L_val=33.6257  t=61s
+  iter   60/600 | dist=  1.9  rew= -18.6  succ=0.00 | L_pol=0.0018  L_val=66.3687  t=72s
+  → VAL dist=1.02
+  iter   70/600 | dist=  2.4  rew=  23.9  succ=0.00 | L_pol=-0.0030  L_val=28.3970  t=87s
+  iter   80/600 | dist=  3.6  rew=  36.2  succ=0.00 | L_pol=0.0029  L_val=58.9802  t=97s
+  → VAL dist=0.85
+  iter   90/600 | dist=  0.7  rew=  -6.8  succ=0.00 | L_pol=-0.0234  L_val=4.0474  t=112s
+  iter  100/600 | dist= 12.7  rew= 126.8  succ=0.00 | L_pol=0.0514  L_val=45.4711  t=121s
+  → VAL dist=0.73
+  iter  110/600 | dist=  1.1  rew=  11.0  succ=0.00 | L_pol=-0.0178  L_val=51.5077  t=137s
+  iter  120/600 | dist=  5.7  rew=  57.5  succ=0.00 | L_pol=-0.0181  L_val=28.3391  t=148s
+  → VAL dist=0.75
+  iter  130/600 | dist=  0.4  rew=  -3.7  succ=0.00 | L_pol=-0.0202  L_val=53.4847  t=162s
+  iter  140/600 | dist=  2.2  rew=  21.5  succ=0.00 | L_pol=-0.0267  L_val=8.2240  t=174s
+  → VAL dist=0.86
+  iter  150/600 | dist=  3.1  rew=  31.2  succ=0.00 | L_pol=-0.0131  L_val=44.4355  t=189s
+  iter  160/600 | dist=  2.1  rew= -21.0  succ=0.00 | L_pol=-0.0022  L_val=43.0636  t=198s
+  → VAL dist=1.08
+  ✓ best saved → /home/ubuntu/workspace/hexapod-wall-tackle/robot_training/models/ppo_best_right.pt
+  iter  170/600 | dist=  2.8  rew=  27.8  succ=0.00 | L_pol=-0.0137  L_val=36.9117  t=214s
+  iter  180/600 | dist=  2.0  rew=  19.8  succ=0.00 | L_pol=0.0056  L_val=13.6750  t=223s
+  → VAL dist=0.94
+  iter  190/600 | dist=  1.1  rew= -10.9  succ=0.00 | L_pol=0.0312  L_val=10.3260  t=238s
+  iter  200/600 | dist=  7.6  rew=  75.9  succ=0.00 | L_pol=-0.0000  L_val=134.6159  t=247s
+  → VAL dist=0.75
+  iter  210/600 | dist=  1.3  rew=  13.3  succ=0.00 | L_pol=-0.0266  L_val=5.5568  t=263s
+  iter  220/600 | dist=  0.4  rew=   4.1  succ=0.00 | L_pol=-0.0257  L_val=12.5233  t=273s
+  → VAL dist=0.54
+  iter  230/600 | dist=  1.3  rew=  13.4  succ=0.00 | L_pol=-0.0312  L_val=4.2132  t=287s
+  iter  240/600 | dist=  0.6  rew=  -6.2  succ=0.00 | L_pol=0.0153  L_val=27.8278  t=298s
+  → VAL dist=0.54
+  iter  250/600 | dist=  4.4  rew=  43.9  succ=0.00 | L_pol=-0.0077  L_val=23.5660  t=314s
+  iter  260/600 | dist=  0.9  rew=   9.0  succ=0.00 | L_pol=-0.0205  L_val=3.3534  t=325s
+  → VAL dist=0.97
+  iter  270/600 | dist=  5.6  rew=  35.5  succ=0.00 | L_pol=0.0038  L_val=29.1858  t=341s
