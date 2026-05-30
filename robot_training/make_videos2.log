@@ -1,0 +1,13 @@
+  primitive    seed00  SUCCESS  dist= 25.1  worst_pen=-0.014
+  primitive    seed01  TIMEOUT  dist=  8.8  worst_pen=-0.017
+  fbm_noise    seed00  TIMEOUT  dist= 18.3  worst_pen=-0.013
+  fbm_noise    seed01  TIMEOUT  dist= 12.7  worst_pen=-0.020
+  random_walk  seed00  TIMEOUT  dist= 15.6  worst_pen=-0.016
+  random_walk  seed01  TIMEOUT  dist=  3.8  worst_pen=-0.017
+  spline       seed00  SUCCESS  dist= 25.0  worst_pen=-0.014
+  spline       seed01  TIMEOUT  dist=  8.5  worst_pen=-0.012
+  wfc          seed00  TIMEOUT  dist= 21.4  worst_pen=-0.018
+  wfc          seed01  TIMEOUT  dist=  4.1  worst_pen=-0.015
+
+[right] 2/10 success  mean_dist=14.3  worst_pen_overall=-0.020
+GIFs → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/graceful2_right

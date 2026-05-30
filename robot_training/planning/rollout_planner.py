@@ -29,6 +29,7 @@ from robot_training.env.terrain_env import (
     ANGLE_NORM, VEL_CLIP, VEL_NORM, FORCE_NORM, HEIGHT_NORM,
     VX_NORM, VY_NORM, PITCH_NORM, PROGRESS_SCALE, FALL_Y, FALL_PITCH,
     ALIVE_BONUS, FALL_PENALTY,
+    PITCH_PENALTY, PITCH_DEADBAND, OMEGA_PENALTY, VY_PENALTY,
     _HIP_KNEE_CENTER, _HIP_KNEE_SCALE, action_to_joints, joints_to_action,
 )
 from robot_training.models.policy import LSTMActorCritic
@@ -65,9 +66,15 @@ def _build_obs(phys: TerrainRobotPhysics, lmap: LocalMap, direction: int) -> np.
 
 def _step_reward(phys: TerrainRobotPhysics, prev_x: float, direction: int) -> tuple:
     """Compute reward after a physics step. Returns (reward, done, new_x)."""
-    bx, by, bth, vx, vy, _ = phys.get_body_state()
+    bx, by, bth, vx, vy, omega = phys.get_body_state()
     dx = (bx - prev_x) * direction
     reward = dx * PROGRESS_SCALE + ALIVE_BONUS
+
+    # Gracefulness shaping (state-based, matches terrain_env) — makes the
+    # lookahead prefer level, smooth trajectories over lurching ones.
+    reward -= PITCH_PENALTY * max(0.0, abs(bth) - PITCH_DEADBAND)
+    reward -= OMEGA_PENALTY * abs(omega)
+    reward -= VY_PENALTY    * abs(vy)
 
     terrain_h = phys._terrain_height_est
     done = (abs(bth) > FALL_PITCH) or (by < terrain_h + FALL_Y)
@@ -161,10 +168,15 @@ class RolloutPlanner:
         self.lookahead    = lookahead
         # Persistent LSTM state for the real trajectory
         self._lstm_state  = policy.init_hidden(1)
+        # Previous applied action — used to penalise abrupt action changes so
+        # the deployed gait is smooth/graceful rather than jittery.
+        self._prev_action = None
+        self.continuity_penalty = 2.0   # weight on mean-squared action change
 
     def reset_hidden(self) -> None:
         """Reset LSTM hidden state at the start of a new episode."""
         self._lstm_state = self.policy.init_hidden(1)
+        self._prev_action = None
 
     def act(self, obs: np.ndarray, phys: TerrainRobotPhysics,
             lmap: LocalMap, direction: int) -> np.ndarray:
@@ -246,6 +258,12 @@ class RolloutPlanner:
                     if step_i == self.lookahead - 2 and not done:
                         total_reward += (GAMMA ** (step_i + 1)) * next_val.item()
 
+                # Continuity: penalise jumping away from the last applied action
+                # so the deployed gait is smooth/graceful, not jittery.
+                if self._prev_action is not None:
+                    d = first_action_np - self._prev_action
+                    total_reward -= self.continuity_penalty * float(np.mean(d * d))
+
                 if total_reward > best_score:
                     best_score  = total_reward
                     best_action = first_action_np
@@ -259,4 +277,5 @@ class RolloutPlanner:
             _, _, _, self._lstm_state = self.policy.act(
                 obs_t, self._lstm_state, deterministic=True)
 
+        self._prev_action = best_action
         return action_to_joints(best_action)

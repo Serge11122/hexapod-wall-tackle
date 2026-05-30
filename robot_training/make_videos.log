@@ -1,0 +1,13 @@
+  primitive    seed00  SUCCESS  dist= 25.5  worst_pen=-0.014
+  primitive    seed01  FALL     dist= 20.8  worst_pen=-0.021
+  fbm_noise    seed00  SUCCESS  dist= 25.0  worst_pen=-0.014
+  fbm_noise    seed01  TIMEOUT  dist=  4.8  worst_pen=-0.015
+  random_walk  seed00  SUCCESS  dist= 25.1  worst_pen=-0.016
+  random_walk  seed01  TIMEOUT  dist= 19.5  worst_pen=-0.019
+  spline       seed00  SUCCESS  dist= 25.1  worst_pen=-0.014
+  spline       seed01  TIMEOUT  dist= 17.1  worst_pen=-0.019
+  wfc          seed00  SUCCESS  dist= 25.3  worst_pen=-0.021
+  wfc          seed01  SUCCESS  dist= 25.0  worst_pen=-0.012
+
+[right] 6/10 success  mean_dist=21.3  worst_pen_overall=-0.021
+GIFs → /home/ubuntu/workspace/hexapod-wall-tackle/robot_vis/vid/trained_right

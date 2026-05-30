@@ -92,10 +92,19 @@ DT           = 1.0 / 5  # 5 fps inference and rendering (matches 8°/frame veloc
 
 # ── Reward shaping ─────────────────────────────────────────────────────────────
 PROGRESS_SCALE  = 10.0    # dominant reward: forward progress (must walk to earn reward)
-CONTACT_BONUS   = 0.0     # zero contact bonus — prevents standing-still exploitation
+CONTACT_BONUS   = 0.0     # NO contact bonus — it let the policy exploit standing still
 ALIVE_BONUS     = 0.02    # tiny per-step alive bonus (walk > stand > fall)
 FALL_PENALTY    = -5.0    # fall penalty — not too harsh so robot explores walking
 SUCCESS_BONUS   = 100.0
+# ── Gracefulness / smoothness shaping ──────────────────────────────────────────
+# LIGHT penalties — progress must stay clearly dominant (heavy penalties made the
+# policy stand still).  The tight PITCH_LIMIT (±14°) hard-stop does most of the
+# levelness work; these only discourage rocking/bouncing/jittery joints.
+PITCH_PENALTY   = 0.25    # per rad of |body pitch| beyond the deadband
+PITCH_DEADBAND  = 0.10    # don't penalise small, natural pitch (±5.7°)
+OMEGA_PENALTY   = 0.04    # per rad/s of |body angular velocity| — no rocking
+VY_PENALTY      = 0.05    # per m/s of |vertical velocity| — no bouncing
+ACTION_SMOOTH   = 0.015   # per unit mean-squared action change — smooth joints
 
 # ── Neutral joint angles for gravity-settling ─────────────────────────────────
 # Natural standing pose: hips ~-65° (pointing diagonally down-forward),
@@ -172,6 +181,7 @@ class TerrainTraversalEnv:
         self._step_count = 0
         self._start_x    = self._physics.body.position.x
         self._prev_x     = self._start_x
+        self._prev_action = np.zeros(ACT_DIM, dtype=np.float32)
         return self._observe()
 
     # ── step ──────────────────────────────────────────────────────────────────
@@ -201,13 +211,21 @@ class TerrainTraversalEnv:
         bx, by, bth, vx, vy, omega = self._physics.get_body_state()
 
         # ── Reward components ─────────────────────────────────────────────────
-        # Forward progress: the only major reward — robot must walk to earn it
+        # Forward progress: the dominant reward — robot must walk to earn it
         dx     = (bx - self._prev_x) * self.direction
         reward = dx * PROGRESS_SCALE
         self._prev_x = bx
 
         # Tiny alive bonus: ensures surviving > falling (but standing ≪ walking)
         reward += ALIVE_BONUS
+
+        # ── Gracefulness shaping: level, smooth, non-lurching gait ────────────
+        reward -= PITCH_PENALTY * max(0.0, abs(bth) - PITCH_DEADBAND)
+        reward -= OMEGA_PENALTY * abs(omega)
+        reward -= VY_PENALTY    * abs(vy)
+        d_act   = action - self._prev_action
+        reward -= ACTION_SMOOTH * float(np.mean(d_act * d_act))
+        self._prev_action = np.asarray(action, dtype=np.float32).copy()
 
         # ── Done conditions ───────────────────────────────────────────────────
         dist  = abs(bx - self._start_x)

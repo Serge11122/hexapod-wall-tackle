@@ -1,0 +1,6 @@
+primitive    n=4 mean=12.9 success=1/4
+fbm_noise    n=4 mean=13.4 success=2/4
+random_walk  n=4 mean=16.7 success=2/4
+spline       n=4 mean=21.0 success=3/4
+wfc          n=4 mean=10.3 success=0/4
+OVERALL: 8/20 success  mean_dist=14.9

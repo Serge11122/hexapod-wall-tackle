@@ -36,7 +36,7 @@ JOINT_MAX_FORCE = 120.0   # max torque each joint motor can exert (N·m) — str
 SUBSTEPS        = 50      # physics sub-steps per env step for accuracy
 # Generous pitch limit (radians, ±34°).  Hard stop only — see _build_robot.
 # Set to None to remove entirely (body may then flip on rough terrain).
-PITCH_LIMIT     = 0.60
+PITCH_LIMIT     = 0.25
 
 # Spawn safety: drop the robot from a clear height and keep it away from walls
 # so it never starts intersecting terrain or boundary walls.
